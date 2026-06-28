@@ -19,12 +19,21 @@ ENV PYTHONUNBUFFERED=1 \
 # --- system toolchains -------------------------------------------------------
 # git: git-source clones. ruby + ruby-dev + build tools: gemspec eval + rubocop.
 # nodejs + npm: eslint + npm lifecycle. ca-certificates/curl: node apt setup.
+# procps/postgresql-client/network tools: make local exploit demos easier to
+# inspect after a controlled reverse shell lands in the worker.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         git \
         curl \
         ca-certificates \
         gnupg \
+        procps \
+        postgresql-client \
+        iproute2 \
+        iputils-ping \
+        netcat-openbsd \
+        dnsutils \
+        less \
         ruby \
         ruby-dev \
         build-essential \
