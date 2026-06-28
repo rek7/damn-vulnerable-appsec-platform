@@ -10,16 +10,13 @@ import os
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
-# Placeholders (must match the literals embedded in every evil-repo, §8)
+# Placeholders (must match the literals embedded in every sample repo)
 # ---------------------------------------------------------------------------
 
 PLACEHOLDER_SCAN_TOKEN = "__DVAP_SCAN_TOKEN__"
 PLACEHOLDER_VECTOR = "__DVAP_VECTOR__"
 PLACEHOLDER_LISTENER_HOST = "__DVAP_LISTENER_HOST__"
 PLACEHOLDER_LISTENER_PORT = "__DVAP_LISTENER_PORT__"
-
-# Substituted for the listener host when block_egress is on (does not resolve).
-BLACKHOLE_HOST = "egress.blocked.invalid"
 
 # ---------------------------------------------------------------------------
 # Synthetic secrets / watermark (§7)
@@ -89,17 +86,17 @@ def k8s_token_dest() -> Path:
     )
 
 
-def evil_repos_root() -> Path:
-    """Root of the bundled evil-repos (overridable for tests)."""
-    override = os.environ.get("DVAP_EVIL_REPOS_DIR")
+def sample_repos_root() -> Path:
+    """Root of the bundled sample repositories (overridable for tests)."""
+    override = os.environ.get("DVAP_SAMPLE_REPOS_DIR")
     if override:
         return Path(override)
-    # Container layout (COPY evil-repos/ /app/evil-repos), then repo-relative.
-    for candidate in (Path("/app/evil-repos"), Path("evil-repos")):
+    # Container layout (COPY sample-repos/ /app/sample-repos), then repo-relative.
+    for candidate in (Path("/app/sample-repos"), Path("sample-repos")):
         if candidate.is_dir():
             return candidate
     # Fallback: sibling of the worker package source tree.
-    return Path(__file__).resolve().parent.parent.parent / "evil-repos"
+    return Path(__file__).resolve().parent.parent.parent / "sample-repos"
 
 
 # ---------------------------------------------------------------------------

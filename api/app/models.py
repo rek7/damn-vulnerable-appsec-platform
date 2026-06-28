@@ -1,4 +1,4 @@
-"""Pydantic v2 data models for DVAP API (§11, §4, §6b of CONTRACTS.md)."""
+"""Pydantic v2 data models for DVAP API (§11, §6b of CONTRACTS.md)."""
 
 from __future__ import annotations
 
@@ -6,20 +6,6 @@ from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field  # noqa: F401 (Field re-exported)
-
-# ---------------------------------------------------------------------------
-# Mitigation config (§4)
-# ---------------------------------------------------------------------------
-
-
-class Config(BaseModel):
-    """Runtime control toggles. Default = all False (observation-mode preset)."""
-
-    strip_credentials: bool = False
-    block_egress: bool = False
-    resolve_symlinks: bool = False
-    disable_extensibility: bool = False
-
 
 # ---------------------------------------------------------------------------
 # Scan models (§11, §9 analyzer/step shapes)
@@ -40,7 +26,7 @@ class AnalyzerResult(BaseModel):
     name: str
     vector: str
     triggered: bool
-    status: Literal["ok", "blocked", "error"]
+    status: Literal["ok", "error"]
     summary: str
     duration_ms: int
 
@@ -58,7 +44,6 @@ class Scan(BaseModel):
     vector: str | None = None
     source: ScanSource
     status: StatusValue
-    mitigations: Config  # snapshot at scan time
     result: str = ""
     analyzers: list[AnalyzerResult] = Field(default_factory=list)
     steps: list[Step] = Field(default_factory=list)
@@ -118,20 +103,6 @@ class CreateScanMeta(BaseModel):
     module: ModuleName
     vector: str | None = None
     source_type: Literal["upload"] = "upload"
-
-
-class ConfigUpdate(BaseModel):
-    """Partial config update body for PUT /api/config."""
-
-    strip_credentials: bool | None = None
-    block_egress: bool | None = None
-    resolve_symlinks: bool | None = None
-    disable_extensibility: bool | None = None
-
-
-# ---------------------------------------------------------------------------
-# WebSocket envelope types (§10)
-# ---------------------------------------------------------------------------
 
 
 class ScanUpdateEnvelope(BaseModel):
@@ -194,7 +165,6 @@ class WorkerRunMeta(BaseModel):
     source_type: SourceType
     vector: str | None = None
     git_url: str | None = None
-    mitigations: Config
     listener_host: str = "listener"
     listener_port: int = 9000
 

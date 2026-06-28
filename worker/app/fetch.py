@@ -18,10 +18,10 @@ from pathlib import Path
 
 from . import config, ssrf
 
-# Map module -> the bundled evil-repo subdirs (relative to evil_repos_root).
+# Map module -> bundled sample repo subdirs (relative to sample_repos_root).
 # Each tuple is (vector_id, relative_path).
 MODULE_SAMPLE_REPOS: dict[str, list[tuple[str, str]]] = {
-    "iac": [("checkov_external_checks", "iac/checkov-rce")],
+    "iac": [("checkov_external_checks", "iac/checkov-external-checks")],
     "sca": [
         ("setup_py_exec", "sca/setup-exec"),
         ("gemspec_eval", "sca/gemspec-eval"),
@@ -45,12 +45,12 @@ class FetchError(RuntimeError):
 
 
 def sample_repo_entries(module: str, vector: str | None) -> list[tuple[str, Path]]:
-    """Resolve bundled evil-repo entries for a module (+ optional vector).
+    """Resolve bundled sample repo entries for a module (+ optional vector).
 
     When ``vector`` is given, only that vector's repo is returned (sample
     isolation, §9). Otherwise every repo registered for the module is returned.
     """
-    root = config.evil_repos_root()
+    root = config.sample_repos_root()
     entries = MODULE_SAMPLE_REPOS.get(module, [])
     chosen = [
         (vec, root / rel) for (vec, rel) in entries if vector is None or vec == vector
@@ -61,12 +61,12 @@ def sample_repo_entries(module: str, vector: str | None) -> list[tuple[str, Path
 
 
 def sample_repo_paths(module: str, vector: str | None) -> list[Path]:
-    """Resolve the bundled evil-repo source dirs for a module (+ optional vector)."""
+    """Resolve bundled sample repo source dirs for a module (+ optional vector)."""
     return [path for _vector, path in sample_repo_entries(module, vector)]
 
 
 def copy_sample_repo(src: Path, dest: Path) -> None:
-    """Copy one bundled evil-repo into ``dest`` (merging, symlinks kept)."""
+    """Copy one bundled sample repo into ``dest`` (merging, symlinks kept)."""
     if not src.is_dir():
         raise FetchError(f"bundled sample repo missing: {src}")
     # Copy contents of src into dest (merging when multiple repos).
@@ -86,7 +86,7 @@ def _is_secret_environ_link(repo: Path, item: Path) -> bool:
     """True for the source fixture symlink that becomes /proc/self/environ.
 
     The checked-in source symlink is intentionally inert so containment tests can
-    inspect ``evil-repos/`` without dereferencing a live test process's env. The
+    inspect ``sample-repos/`` without dereferencing a live test process's env. The
     worker materializes the real traversal target only inside scan workdirs.
     """
     return (
@@ -98,7 +98,7 @@ def _is_secret_environ_link(repo: Path, item: Path) -> bool:
 
 
 def copy_sample(module: str, vector: str | None, dest: Path) -> None:
-    """Copy the bundled evil-repo(s) for a module into ``dest`` (symlinks kept).
+    """Copy bundled sample repo contents for a module into ``dest``.
 
     ``symlinks=True`` is essential: the secrets/symlink repo's ``leak`` must be
     copied as a symlink, not dereferenced.

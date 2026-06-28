@@ -70,7 +70,6 @@ def test_beacon_host_block_loopback_and_metadata() -> None:
     assert ssrf.is_blocked_beacon_host("172.16.0.2") is True
     assert ssrf.is_blocked_beacon_host("93.184.216.34") is True
     assert ssrf.is_blocked_beacon_host("example.com") is True
-    assert ssrf.is_blocked_beacon_host("egress.blocked.invalid") is True
     assert ssrf.is_blocked_beacon_host("") is True
 
 

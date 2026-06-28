@@ -1,4 +1,4 @@
-"""Per-scan job orchestration: fetch -> harden -> env -> analyze -> wipe (§9).
+"""Per-scan job orchestration: fetch -> env -> analyze -> wipe (§9).
 
 The ephemeral workdir is ALWAYS wiped in a ``finally``, even on error -- that is
 the "ephemeral worker" containment control (§2.7).
@@ -41,7 +41,6 @@ def _fetch_repo(
                 vector=vector_id,
                 listener_host=meta.listener_host,
                 listener_port=meta.listener_port,
-                block_egress=meta.mitigations.block_egress,
             )
             templating.apply_to_tree(workdir, subs)
         _step(steps, "info", f"fetched sample repo for module={meta.module}")
@@ -73,40 +72,25 @@ def run_job(meta: RunMeta, archive_path: Path | None = None) -> RunResponse:
         # --- env / seeds (§7) -------------------------------------------
         loaded_seeds = seeds.load_seeds()
         k8s_token = seeds.load_k8s_token()
-        strip = meta.mitigations.strip_credentials
 
-        env = seeds.build_subprocess_env(loaded_seeds, strip_credentials=strip)
-        # Seeds visible to analyzers (for the worker-side symlink beacon exfil).
-        visible_seeds: dict[str, str] = {} if strip else dict(loaded_seeds)
-        visible_token = "" if strip else k8s_token
-
-        if strip:
-            seeds.remove_k8s_token()
-            _step(
-                steps,
-                "info",
-                "strip_credentials ON -- no synthetic seeds in env, k8s token "
-                "not written",
-            )
-        else:
-            k8s_dest = seeds.write_k8s_token(k8s_token)
-            _step(
-                steps,
-                "info",
-                "synthetic seeds injected into analyzer env"
-                + (f"; k8s token written to {k8s_dest}" if k8s_dest else ""),
-            )
+        env = seeds.build_subprocess_env(loaded_seeds)
+        k8s_dest = seeds.write_k8s_token(k8s_token)
+        _step(
+            steps,
+            "info",
+            "synthetic seeds injected into analyzer env"
+            + (f"; k8s token written to {k8s_dest}" if k8s_dest else ""),
+        )
 
         # --- run analyzers ----------------------------------------------
         ctx = AnalyzerContext(
             workdir=workdir,
-            mitigations=meta.mitigations,
             scan_token=meta.scan_token,
             listener_host=meta.listener_host,
             listener_port=meta.listener_port,
             env=env,
-            seeds=visible_seeds,
-            k8s_token=visible_token,
+            seeds=dict(loaded_seeds),
+            k8s_token=k8s_token,
             steps=steps,
         )
         results: list[AnalyzerResult] = []

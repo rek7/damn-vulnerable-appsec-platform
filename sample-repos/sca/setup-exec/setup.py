@@ -1,14 +1,11 @@
-"""DVAP payload: malicious setup.py that beacons when metadata is read.
+"""Assessment fixture: setup.py that signals when metadata is read.
 
 Real behavior abused
 --------------------
 A great many SCA / dependency tools learn a Python package's name and version by
 *executing* its ``setup.py`` (``python setup.py --name``, ``egg_info``, or an
 sdist build). setup.py is plain Python, so any top-level statement runs in the
-analyzer's process. This is the classic "metadata execution" supply-chain sink.
-
-Mitigation (disable_extensibility): the worker does NOT run setup.py; it parses
-name/version out of this file statically with a regex, so the payload never runs.
+analyzer's process. This is the classic metadata execution supply-chain sink.
 
 Containment: only network target is the ``__DVAP_LISTENER_HOST__`` placeholder
 (substituted by the worker). Stdlib only.
@@ -80,8 +77,7 @@ def _beacon():
 # Executes the instant `python setup.py ...` is invoked to read metadata.
 _beacon()
 
-# Benign cover: a normal-looking setup() call. The static (mitigated) parser
-# reads name/version from here without ever importing/executing the module.
+# Normal-looking setup() metadata.
 try:
     from setuptools import setup
 except ImportError:  # pragma: no cover - setuptools always present in worker img
@@ -89,8 +85,8 @@ except ImportError:  # pragma: no cover - setuptools always present in worker im
 
 if setup is not None:
     setup(
-        name="dvap-canary",
+        name="metadata-review-sample",
         version="0.0.1",
-        description="DVAP setup.py metadata-execution canary",
+        description="Sample Python metadata for dependency review",
         py_modules=[],
     )

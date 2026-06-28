@@ -5,11 +5,9 @@
 #   up            — build and start the full stack (docker compose up -d)
 #   down          — stop and remove containers
 #   reset         — full teardown + rebuild (removes volumes/images)
-#   demo-iac      — apply VULNERABLE, submit IaC checkov-rce sample, show result
-#   demo-sca      — apply VULNERABLE, submit SCA setup-exec sample, show result
-#   demo-secrets  — apply VULNERABLE, submit secrets symlink sample, show result
-#   harden        — apply protected-mode preset via API
-#   vulnerable    — apply observation-mode preset via API
+#   sample-iac    — submit IaC external-checks sample, show result
+#   sample-sca    — submit SCA setup-exec sample, show result
+#   sample-secrets — submit secrets symlink sample, show result
 #   test          — run unit tests for all Python services + frontend
 #   e2e           — run e2e suite against the running stack
 #   lint          — ruff + black check + eslint across all services
@@ -29,7 +27,7 @@ PYTHON      ?= python3
 PYTHON_SERVICES := api worker listener
 FRONTEND_DIR    := frontend
 
-.PHONY: up down reset demo-iac demo-sca demo-secrets harden vulnerable \
+.PHONY: up down reset sample-iac sample-sca sample-secrets \
         test e2e lint typecheck canarytokens _wait-api
 
 # ---------------------------------------------------------------------------
@@ -56,8 +54,8 @@ canarytokens:
 	$(PYTHON) scripts/create_canarytokens.py
 
 # ---------------------------------------------------------------------------
-# Demo targets — zero live typing; each submits a known sample against a known
-# preset and prints the result from the API. (SPEC §13)
+# Sample targets — zero live typing; each submits a known sample and prints the
+# result from the API. (SPEC §13)
 # ---------------------------------------------------------------------------
 
 _wait-api:
@@ -68,64 +66,41 @@ _wait-api:
 	done
 	@curl -sf $(API_URL)/api/healthz > /dev/null || (echo "API not healthy" && exit 1)
 
-demo-iac: _wait-api
-	@echo "=== IaC Demo: checkov_external_checks ==="
-	@echo "Step 1: Apply observation-mode preset"
-	@curl -sf -X POST $(API_URL)/api/config/preset/vulnerable | python3 -m json.tool
-	@echo ""
-	@echo "Step 2: Submit IaC checkov-rce sample"
+sample-iac: _wait-api
+	@echo "=== IaC Sample: checkov_external_checks ==="
+	@echo "Step 1: Submit IaC external-checks sample"
 	@curl -sf -X POST $(API_URL)/api/scans \
 		-H 'Content-Type: application/json' \
 		-d '{"module":"iac","vector":"checkov_external_checks","source_type":"sample"}' \
 		| python3 -m json.tool
 	@echo ""
-	@echo "Step 3: Recent callback events"
+	@echo "Step 2: Recent callback events"
 	@sleep 3
 	@curl -sf "$(API_URL)/api/beacons" | python3 -m json.tool
 
-demo-sca: _wait-api
-	@echo "=== SCA Demo: setup_py_exec ==="
-	@echo "Step 1: Apply observation-mode preset"
-	@curl -sf -X POST $(API_URL)/api/config/preset/vulnerable | python3 -m json.tool
-	@echo ""
-	@echo "Step 2: Submit SCA setup-exec sample"
+sample-sca: _wait-api
+	@echo "=== SCA Sample: setup_py_exec ==="
+	@echo "Step 1: Submit SCA setup-exec sample"
 	@curl -sf -X POST $(API_URL)/api/scans \
 		-H 'Content-Type: application/json' \
 		-d '{"module":"sca","vector":"setup_py_exec","source_type":"sample"}' \
 		| python3 -m json.tool
 	@echo ""
-	@echo "Step 3: Recent callback events"
+	@echo "Step 2: Recent callback events"
 	@sleep 3
 	@curl -sf "$(API_URL)/api/beacons" | python3 -m json.tool
 
-demo-secrets: _wait-api
-	@echo "=== Secrets Demo: symlink_traversal ==="
-	@echo "Step 1: Apply observation-mode preset"
-	@curl -sf -X POST $(API_URL)/api/config/preset/vulnerable | python3 -m json.tool
-	@echo ""
-	@echo "Step 2: Submit secrets symlink sample"
+sample-secrets: _wait-api
+	@echo "=== Secrets Sample: symlink_traversal ==="
+	@echo "Step 1: Submit secrets symlink sample"
 	@curl -sf -X POST $(API_URL)/api/scans \
 		-H 'Content-Type: application/json' \
 		-d '{"module":"secrets","vector":"symlink_traversal","source_type":"sample"}' \
 		| python3 -m json.tool
 	@echo ""
-	@echo "Step 3: Recent callback events"
+	@echo "Step 2: Recent callback events"
 	@sleep 3
 	@curl -sf "$(API_URL)/api/beacons" | python3 -m json.tool
-
-# ---------------------------------------------------------------------------
-# Mitigation presets
-# ---------------------------------------------------------------------------
-
-harden: _wait-api
-	@echo "Applying protected-mode preset..."
-	@curl -sf -X POST $(API_URL)/api/config/preset/hardened | python3 -m json.tool
-	@echo "All mitigations are now ON."
-
-vulnerable: _wait-api
-	@echo "Applying observation-mode preset..."
-	@curl -sf -X POST $(API_URL)/api/config/preset/vulnerable | python3 -m json.tool
-	@echo "All mitigations are now OFF (default / demo-ready state)."
 
 # ---------------------------------------------------------------------------
 # Testing

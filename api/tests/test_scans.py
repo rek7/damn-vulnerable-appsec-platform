@@ -78,24 +78,31 @@ def test_create_scan_returns_scan_token(monkeypatch: pytest.MonkeyPatch) -> None
     assert re.match(r"^[0-9a-f]{12}$", data["scan_token"])
 
 
-def test_create_scan_snapshots_config(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Mitigations snapshot on the scan should reflect config at scan time."""
+def test_create_scan_omits_runtime_controls(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Scans expose only the active assessment fields."""
     import app.routes.scans as scans_mod
 
     monkeypatch.setattr(
         scans_mod, "call_worker", _mock_call_worker(_make_worker_resp())
     )
 
-    # Harden first
-    client.post("/api/config/preset/hardened")
     resp = client.post("/api/scans", json={"module": "iac", "source_type": "sample"})
     assert resp.status_code == 200
     data = resp.json()
-    mitigations = data["mitigations"]
-    assert mitigations["disable_extensibility"] is True
-
-    # Reset to vulnerable for other tests
-    client.post("/api/config/preset/vulnerable")
+    assert set(data) == {
+        "id",
+        "scan_token",
+        "module",
+        "vector",
+        "source",
+        "status",
+        "result",
+        "analyzers",
+        "steps",
+        "beacon_count",
+        "created_at",
+        "updated_at",
+    }
 
 
 def test_scan_failed_on_worker_error(monkeypatch: pytest.MonkeyPatch) -> None:

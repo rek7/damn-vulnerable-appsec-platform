@@ -113,11 +113,6 @@ export function Scans() {
                           {summary.open} open
                         </span>
                       )}
-                      {summary.prevented > 0 && (
-                        <span className="tag border-neon/60 text-neon">
-                          {summary.prevented} prevented
-                        </span>
-                      )}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right font-mono">

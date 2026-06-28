@@ -1,9 +1,8 @@
 """setup.py analyzer (vector ``setup_py_exec``).
 
-Trigger: a ``setup.py`` in the repo. Vulnerable path runs ``python setup.py
---name`` to read metadata, executing the file. Mitigated path
-(``disable_extensibility``) parses name/version statically with a regex and never
-executes the file.
+Trigger: a ``setup.py`` in the repo. The analyzer runs ``python setup.py --name``
+to read metadata, executing project package code the same way legacy metadata
+collection does.
 """
 
 from __future__ import annotations
@@ -11,7 +10,6 @@ from __future__ import annotations
 import shutil
 import subprocess
 
-from .. import sanitize
 from ..models import AnalyzerResult
 from . import AnalyzerContext
 from ._common import Timer, add_step, find_file
@@ -32,31 +30,10 @@ def run(ctx: AnalyzerContext) -> AnalyzerResult:
             duration_ms=0,
         )
 
-    if ctx.mitigations.disable_extensibility:
-        with Timer() as timer:
-            name, version = sanitize.parse_setup_metadata(
-                setup_path.read_text(encoding="utf-8")
-            )
-        add_step(
-            ctx.steps,
-            "info",
-            "setup_py: disable_extensibility ON -- parsed metadata statically, "
-            "no execution",
-        )
-        return AnalyzerResult(
-            name=NAME,
-            vector=VECTOR,
-            triggered=True,
-            status="blocked",
-            summary=f"static parse: name={name} version={version}",
-            duration_ms=timer.ms,
-        )
-
     add_step(
         ctx.steps,
         "warn",
-        "setup_py: executing `python setup.py --name` to read metadata "
-        "(vulnerable path)",
+        "setup_py: executing `python setup.py --name` to read metadata",
     )
     python_bin = shutil.which("python3") or shutil.which("python")
     if python_bin is None:

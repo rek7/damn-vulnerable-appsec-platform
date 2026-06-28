@@ -1,6 +1,6 @@
 # DVAP worker image.
 #
-# Build context MUST be the repo ROOT (it COPYs worker/, evil-repos/, seeds/):
+# Build context MUST be the repo ROOT (it COPYs worker/, sample-repos/, seeds/):
 #     docker build -f worker/Dockerfile -t dvap-worker .
 #
 # This scan worker runs submitted repository contents through real analyzer
@@ -19,8 +19,7 @@ ENV PYTHONUNBUFFERED=1 \
 # --- system toolchains -------------------------------------------------------
 # git: git-source clones. ruby + ruby-dev + build tools: gemspec eval + rubocop.
 # nodejs + npm: eslint + npm lifecycle. ca-certificates/curl: node apt setup.
-# procps/postgresql-client/network tools: make local exploit demos easier to
-# inspect after a controlled reverse shell lands in the worker.
+# procps/postgresql-client/network tools: local inspection during assessment runs.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         git \
@@ -58,9 +57,9 @@ COPY worker/requirements.txt /app/worker/requirements.txt
 RUN pip install --no-cache-dir -r /app/worker/requirements.txt \
     && pip install --no-cache-dir setuptools wheel
 
-# --- application + bundled payloads + synthetic seeds ------------------------
+# --- application + bundled samples + synthetic seeds --------------------------
 COPY worker/ /app/worker
-COPY evil-repos/ /app/evil-repos
+COPY sample-repos/ /app/sample-repos
 COPY seeds/ /app/seeds
 
 # --- non-root user + writable k8s SA token dir -------------------------------
@@ -74,7 +73,7 @@ USER dvap
 
 ENV DVAP_SEEDS_FILE=/app/seeds/synthetic.env \
     DVAP_K8S_TOKEN_SRC=/app/seeds/k8s-sa-token \
-    DVAP_EVIL_REPOS_DIR=/app/evil-repos
+    DVAP_SAMPLE_REPOS_DIR=/app/sample-repos
 
 EXPOSE 8100
 

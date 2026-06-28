@@ -6,18 +6,18 @@
 #      worker refuses to boot if watermark check fails.
 #   2. No public-internet egress — all services communicate on an isolated bridge network.
 #      Published ports are bound to 127.0.0.1 only.
-#   3. Beacons stay internal — bundled payloads beacon only to the in-network listener;
-#      no evil-repos/ file may reference an external domain (a test enforces this).
+#   3. Signals stay internal — bundled samples signal only to the in-network listener;
+#      no sample-repos/ file may reference an external domain (a test enforces this).
 #   4. Link-local/metadata addresses blocked in code (worker rejects 169.254.0.0/16).
 #   5. SSRF guard on git URLs — allowlisted hosts only (github.com, gitlab.com,
 #      bitbucket.org, codeberg.org); private/loopback/link-local IPs rejected.
 #   6. Worker runs non-root with resource limits (cpu, memory, pids).
-#   7. Lateral-movement lab posture — app services intentionally share the
-#      internal Postgres network path and synthetic DB credentials.
+#   7. Assessment data exposure — app services intentionally share the internal
+#      Postgres network path and synthetic DB credentials.
 #
 # MAXIMUM ISOLATION (optional): set the dvap-net network to `internal: true` below.
 # This disables git-URL ingestion mode (no outbound DNS/TCP for git clone) but keeps
-# the sample-payload and archive-upload modes fully functional.
+# the sample-repo and archive-upload modes fully functional.
 
 x-logging: &default-logging
   driver: json-file
@@ -142,7 +142,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
-    # --- Worker hardening (SPEC §2.7, CONTRACTS §2) ---
+    # --- Worker runtime limits (SPEC §2.7, CONTRACTS §2) ---
     user: "10001:10001"         # non-root; MUST match uid of `dvap` user in worker/Dockerfile
     read_only: false            # worker needs /tmp for ephemeral workdirs
     security_opt:

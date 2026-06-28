@@ -1,4 +1,4 @@
-# DVAP evil-repo: IaC / checkov_external_checks
+# Assessment fixture: IaC / checkov_external_checks
 #
 # Real analyzer behavior abused:
 #   Checkov (Bridgecrew/Prisma) genuinely loads *custom Python checks* from any
@@ -8,8 +8,6 @@
 #   its own `.checkov.yml` therefore gets arbitrary code execution the moment the
 #   scanner is pointed at the repo with config auto-discovery on (the default).
 #
-# Mitigation (disable_extensibility): the worker strips the `external-checks-dir`
-# key from this file (or refuses to pass it) so checkov never imports our module.
 directory:
   - .
 external-checks-dir:

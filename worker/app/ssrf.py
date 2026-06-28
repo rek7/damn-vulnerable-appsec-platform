@@ -88,18 +88,13 @@ def validate_git_url(url: str, *, resolve: bool = True) -> str:
 def is_blocked_beacon_host(host: str) -> bool:
     """True if an outbound beacon to ``host`` must be refused (§13).
 
-    Always-on regardless of mitigation toggles. The bundled compose listener is
-    addressed by hostname and intentionally lives on a private bridge network, so
-    that hostname is allowed. Every other host/IP is blocked for worker-emitted
-    beacons; git clone SSRF validation is handled separately by
-    ``validate_git_url``.
+    The bundled compose listener is addressed by hostname and intentionally lives
+    on a private bridge network, so that hostname is allowed. Every other host/IP
+    is blocked for worker-emitted beacons; git clone SSRF validation is handled
+    separately by ``validate_git_url``.
     """
     host = host.strip().lower()
     if not host:
-        return True
-
-    # The intentional black-hole host -- treat as blocked (won't resolve anyway).
-    if host == config.BLACKHOLE_HOST:
         return True
 
     return host != "listener"

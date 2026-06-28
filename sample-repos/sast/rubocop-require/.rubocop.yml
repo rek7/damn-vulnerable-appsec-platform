@@ -1,4 +1,4 @@
-# DVAP payload: .rubocop.yml whose `require:` loads attacker Ruby at startup.
+# Assessment fixture: .rubocop.yml whose `require:` loads Ruby at startup.
 #
 # Real behavior abused
 # --------------------
@@ -8,13 +8,10 @@
 # Ruby execution inside the linter the moment it is scanned with config
 # auto-discovery on (the default).
 #
-# Mitigation (disable_extensibility): the worker strips `require:` lines from
-# this file before running rubocop, so the malicious cop is never loaded.
-#
-# Containment: the required file (dvap_cop.rb) only beacons to the
+# Containment: the required file only signals to the
 # __DVAP_LISTENER_HOST__ placeholder. No external host appears here.
 require:
-  - ./dvap_cop.rb
+  - ./repository_rule.rb
 
 AllCops:
   NewCops: disable

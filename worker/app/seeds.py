@@ -132,23 +132,10 @@ def startup_watermark_check() -> tuple[dict[str, str], str]:
     return seeds, token
 
 
-def build_subprocess_env(
-    seeds: dict[str, str], *, strip_credentials: bool
-) -> dict[str, str]:
-    """Build the analyzer subprocess env from os.environ plus seeds (§4, §7).
-
-    When ``strip_credentials`` is on, the synthetic seed keys are explicitly
-    removed so the payload can read nothing (exfil decodes empty).
-    """
+def build_subprocess_env(seeds: dict[str, str]) -> dict[str, str]:
+    """Build the analyzer subprocess env from os.environ plus synthetic seeds."""
     env = dict(os.environ)
-    if strip_credentials:
-        for key in seeds:
-            env.pop(key, None)
-        # Also drop any seed-named keys that might have leaked from os.environ.
-        for key in config.SECRET_ENV_KEYS:
-            env.pop(key, None)
-    else:
-        env.update(seeds)
+    env.update(seeds)
     return env
 
 
@@ -166,7 +153,7 @@ def write_k8s_token(token: str, dest: Path | None = None) -> Path | None:
 
 
 def remove_k8s_token(dest: Path | None = None) -> None:
-    """Remove the k8s SA token file (used when strip_credentials is on)."""
+    """Remove the k8s SA token file."""
     target = dest if dest is not None else config.k8s_token_dest()
     try:
         target.unlink()

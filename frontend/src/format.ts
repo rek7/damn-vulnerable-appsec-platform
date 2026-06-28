@@ -34,8 +34,6 @@ export function analyzerStatusColor(status: AnalyzerStatus): string {
   switch (status) {
     case 'ok':
       return 'text-neon border-neon/60';
-    case 'blocked':
-      return 'text-cyan border-cyan/60';
     case 'error':
       return 'text-danger border-danger/60';
     default:

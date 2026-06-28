@@ -45,13 +45,12 @@ describe('ModulePage', () => {
     expect(screen.getByTestId('run-sample-npm_lifecycle')).toBeInTheDocument();
   });
 
-  it('shows assessment context instead of settings controls', async () => {
+  it('shows assessment context', async () => {
     renderModule('iac');
 
     await screen.findByRole('heading', { name: 'IaC Scanning' });
     expect(screen.getByText(/assessment context/i)).toBeInTheDocument();
     expect(screen.getByText(/assessment profile/i)).toBeInTheDocument();
-    expect(screen.queryByText(/protected mode/i)).not.toBeInTheDocument();
   });
 
   it('runs a validation scenario: POSTs the right body and renders the inline result', async () => {

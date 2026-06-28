@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from app import config, seeds
+from app import seeds
 from tests.conftest import GOOD_SEEDS, GOOD_TOKEN, write_env_file
 
 
@@ -83,45 +83,23 @@ def test_build_subprocess_env_includes_seeds_by_default(
     synthetic_seeds: dict[str, Path],
 ) -> None:
     loaded = seeds.load_seeds(synthetic_seeds["seeds_file"])
-    env = seeds.build_subprocess_env(loaded, strip_credentials=False)
+    env = seeds.build_subprocess_env(loaded)
     for key, value in GOOD_SEEDS.items():
         assert env[key] == value
 
 
-def test_build_subprocess_env_strips_seeds_when_mitigated(
+def test_subprocess_env_exposes_seed_patterns(
     synthetic_seeds: dict[str, Path],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    loaded = seeds.load_seeds(synthetic_seeds["seeds_file"])
-    monkeypatch.setenv(
-        "APP_DATABASE_URL",
-        "postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap",
-    )
-    env = seeds.build_subprocess_env(loaded, strip_credentials=True)
-    for key in GOOD_SEEDS:
-        assert key not in env
-    # Also every config secret key is scrubbed even if it leaked from os.environ.
-    for key in config.SECRET_ENV_KEYS:
-        assert key not in env
-
-
-def test_stripped_subprocess_env_has_no_secret_scanner_findings(
-    synthetic_seeds: dict[str, Path],
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from app import secret_patterns
 
     loaded = seeds.load_seeds(synthetic_seeds["seeds_file"])
-    monkeypatch.setenv(
-        "APP_DATABASE_URL",
-        "postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap",
-    )
 
-    stripped = seeds.build_subprocess_env(loaded, strip_credentials=True)
-    env_text = "\x00".join(f"{key}={value}" for key, value in stripped.items())
+    env = seeds.build_subprocess_env(loaded)
+    env_text = "\x00".join(f"{key}={value}" for key, value in env.items())
 
-    assert "APP_DATABASE_URL" not in stripped
-    assert secret_patterns.find_secrets_in_text(env_text) == []
+    assert "APP_DATABASE_URL" in env
+    assert "postgres_url" in secret_patterns.find_secrets_in_text(env_text)
 
 
 def test_write_and_remove_k8s_token(synthetic_seeds: dict[str, Path]) -> None:

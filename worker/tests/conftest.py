@@ -63,9 +63,9 @@ def synthetic_seeds(tmp_path: Path) -> dict[str, Path]:
 
 
 @pytest.fixture
-def evil_repos_dir() -> Path:
-    """Absolute path to the bundled evil-repos (sibling of the worker package)."""
-    return Path(__file__).resolve().parent.parent.parent / "evil-repos"
+def sample_repos_dir() -> Path:
+    """Absolute path to the bundled sample repos."""
+    return Path(__file__).resolve().parent.parent.parent / "sample-repos"
 
 
 @pytest.fixture

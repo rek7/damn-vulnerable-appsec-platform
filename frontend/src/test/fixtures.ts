@@ -1,19 +1,5 @@
-// Shared test fixtures mirroring CONTRACTS §11 shapes.
-import type { Beacon, Config, Scan } from '../types';
-
-export const vulnerableConfig: Config = {
-  strip_credentials: false,
-  block_egress: false,
-  resolve_symlinks: false,
-  disable_extensibility: false,
-};
-
-export const hardenedConfig: Config = {
-  strip_credentials: true,
-  block_egress: true,
-  resolve_symlinks: true,
-  disable_extensibility: true,
-};
+// Shared test fixtures mirroring API scan/beacon shapes.
+import type { Beacon, Scan } from '../types';
 
 export const sampleBeacon: Beacon = {
   id: 'beacon-1',
@@ -49,8 +35,7 @@ export const sampleScan: Scan = {
   vector: 'checkov_external_checks',
   source: { type: 'sample', ref: 'sample' },
   status: 'completed',
-  mitigations: vulnerableConfig,
-  result: 'checkov loaded external check; payload executed and beaconed.',
+  result: 'checkov loaded external check; assessment signal generated.',
   analyzers: [
     {
       name: 'checkov',

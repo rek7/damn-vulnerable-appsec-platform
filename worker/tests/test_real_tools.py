@@ -17,7 +17,6 @@ import pytest
 
 from app import fetch, templating
 from app.analyzers import AnalyzerContext, checkov
-from app.models import Mitigations
 from tests.conftest import GOOD_SEEDS, GOOD_TOKEN
 
 
@@ -66,13 +65,11 @@ def test_checkov_external_check_executes_and_beacons(
         vector="checkov_external_checks",
         listener_host=host,
         listener_port=port,
-        block_egress=False,
     )
     templating.apply_to_tree(tmp_path, subs)
 
     ctx = AnalyzerContext(
         workdir=tmp_path,
-        mitigations=Mitigations(),
         scan_token="abcdef012345",
         listener_host=host,
         listener_port=port,

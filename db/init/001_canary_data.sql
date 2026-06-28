@@ -16,7 +16,7 @@ VALUES
         'aws_access_key_id',
         'platform-security',
         'AKIAFAKECANARY000001',
-        'Synthetic canary credential for lateral-movement validation.'
+        'Synthetic credential for assessment data exposure validation.'
     ),
     (
         'aws-deploy-secret-key',
@@ -24,7 +24,7 @@ VALUES
         'aws_secret_access_key',
         'platform-security',
         'FAKEAwsCanarySecretKeyForDVAPDoNotUse000000000FAKE',
-        'Synthetic canary credential for lateral-movement validation.'
+        'Synthetic credential for assessment data exposure validation.'
     ),
     (
         'aws-session-token',

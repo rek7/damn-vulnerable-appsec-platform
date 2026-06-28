@@ -14,7 +14,6 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 
 from .models import HealthResponse
 from .routes.beacons import router as beacons_router
-from .routes.config import router as config_router
 from .routes.scans import router as scans_router
 from .store import store
 from .ws import hub
@@ -48,7 +47,6 @@ app = FastAPI(
 # Routers
 # -----------------------------------------------------------------------
 
-app.include_router(config_router)
 app.include_router(beacons_router)
 app.include_router(scans_router)
 

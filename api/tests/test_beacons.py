@@ -7,7 +7,7 @@ import asyncio
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.models import Config, Scan, ScanSource, utcnow_iso
+from app.models import Scan, ScanSource, utcnow_iso
 from app.store import Store
 
 client = TestClient(app)
@@ -21,7 +21,6 @@ async def _seed_scan(s: Store, scan_token: str, scan_id: str) -> Scan:
         module="iac",
         source=ScanSource(type="sample", ref="sample"),
         status="completed",
-        mitigations=Config(),
         created_at=now,
         updated_at=now,
     )

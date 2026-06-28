@@ -13,7 +13,7 @@ from typing import Any
 
 import httpx
 
-from .models import Config, SourceType, WorkerResponse
+from .models import SourceType, WorkerResponse
 
 _WORKER_BASE_URL = os.environ.get("DVAP_WORKER_URL", "http://worker:8100")
 # Timeout: worker may need time to clone + run analyzers
@@ -28,7 +28,6 @@ async def call_worker(
     source_type: SourceType,
     vector: str | None,
     git_url: str | None,
-    mitigations: Config,
     archive_bytes: bytes | None = None,
     archive_filename: str = "archive.zip",
     listener_host: str = "listener",
@@ -45,7 +44,6 @@ async def call_worker(
         "source_type": source_type,
         "vector": vector,
         "git_url": git_url,
-        "mitigations": mitigations.model_dump(),
         "listener_host": listener_host,
         "listener_port": listener_port,
     }

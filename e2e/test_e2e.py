@@ -4,12 +4,11 @@ API-level tests — no browser required.  Run inside docker-compose.test.yml
 where all service hostnames resolve on dvap-net.
 
 Test matrix (parametrized per vector):
-  - observation preset + validation scenario -> beacon {scan_token}/{vector} arrives
-    within BEACON_TIMEOUT_S and appears in scan detail.
-  - Matching control ON -> no beacon within BEACON_TIMEOUT_S.
+  - validation scenario -> beacon {scan_token}/{vector} arrives within
+    BEACON_TIMEOUT_S and appears in scan detail.
 
 Additional containment assertions:
-  - No evil-repos/ file references an external hostname (non-listener).
+  - No sample-repos/ file references an external hostname (non-listener).
 """
 
 from __future__ import annotations
@@ -50,15 +49,15 @@ EXPECTED_EXFIL_KEYS = (
     "K8S_SA_TOKEN=",
 )
 
-# Map each (module, vector) → the primary blocking mitigation (CONTRACTS §3)
-VECTOR_MITIGATION: list[tuple[str, str, str]] = [
-    ("iac", "checkov_external_checks", "disable_extensibility"),
-    ("sca", "setup_py_exec", "disable_extensibility"),
-    ("sca", "gemspec_eval", "disable_extensibility"),
-    ("sca", "npm_lifecycle", "disable_extensibility"),
-    ("sast", "eslintrc_js_exec", "disable_extensibility"),
-    ("sast", "rubocop_require", "disable_extensibility"),
-    ("secrets", "symlink_traversal", "resolve_symlinks"),
+# Sample vectors exercised by the e2e suite.
+VECTORS: list[tuple[str, str]] = [
+    ("iac", "checkov_external_checks"),
+    ("sca", "setup_py_exec"),
+    ("sca", "gemspec_eval"),
+    ("sca", "npm_lifecycle"),
+    ("sast", "eslintrc_js_exec"),
+    ("sast", "rubocop_require"),
+    ("secrets", "symlink_traversal"),
 ]
 
 # ---------------------------------------------------------------------------
@@ -73,22 +72,6 @@ def api(path: str, **kwargs: Any) -> httpx.Response:
 
 def api_post(path: str, **kwargs: Any) -> httpx.Response:
     return httpx.post(f"{API_BASE}{path}", timeout=60, **kwargs)
-
-
-def api_put(path: str, **kwargs: Any) -> httpx.Response:
-    return httpx.put(f"{API_BASE}{path}", timeout=30, **kwargs)
-
-
-def set_preset(preset: str) -> None:
-    """Apply observation or protected preset."""
-    r = api_post(f"/api/config/preset/{preset}")
-    assert r.status_code == 200, f"preset {preset} failed: {r.text}"
-
-
-def set_mitigation(mitigation: str, value: bool) -> None:
-    """Flip one mitigation toggle."""
-    r = api_put("/api/config", json={mitigation: value})
-    assert r.status_code == 200, f"set_mitigation failed: {r.text}"
 
 
 def submit_sample(module: str, vector: str) -> str:
@@ -137,22 +120,8 @@ def test_api_healthz() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Fresh-boot is VULNERABLE: default config is all-off
+# Seeded assessment data
 # ---------------------------------------------------------------------------
-
-
-def test_default_config_is_vulnerable() -> None:
-    r = api("/api/config")
-    assert r.status_code == 200
-    cfg = r.json()
-    for key in (
-        "strip_credentials",
-        "block_egress",
-        "resolve_symlinks",
-        "disable_extensibility",
-    ):
-        assert key in cfg, f"missing config key: {key}"
-        assert cfg[key] is False, f"{key} should be False on fresh boot"
 
 
 def test_postgres_seeded_integration_credentials() -> None:
@@ -179,60 +148,24 @@ def test_postgres_seeded_integration_credentials() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Per-vector parametrized test: fires in observation mode, blocked when mitigated
+# Per-vector parametrized test: every sample produces a signal
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("module,vector,mitigation", VECTOR_MITIGATION)
-def test_vector_fires_when_vulnerable(
-    module: str, vector: str, mitigation: str
-) -> None:
-    """Beacon arrives within BEACON_TIMEOUT_S when controls are disabled."""
-    set_preset("vulnerable")
+@pytest.mark.parametrize("module,vector", VECTORS)
+def test_vector_generates_signal(module: str, vector: str) -> None:
+    """Beacon arrives within BEACON_TIMEOUT_S for each sample."""
     scan_token = submit_sample(module, vector)
     beacon = wait_for_beacon(scan_token, vector, BEACON_TIMEOUT_S)
     assert beacon is not None, (
         f"[FAIL] beacon {scan_token}/{vector} did NOT arrive within "
-        f"{BEACON_TIMEOUT_S}s (expected: fires in observation mode)"
+        f"{BEACON_TIMEOUT_S}s"
     )
     assert_expected_exfil(beacon)
 
 
-@pytest.mark.parametrize("module,vector,mitigation", VECTOR_MITIGATION)
-def test_vector_blocked_when_mitigated(
-    module: str, vector: str, mitigation: str
-) -> None:
-    """No beacon when the matching mitigation is ON."""
-    set_preset("vulnerable")  # start clean
-    set_mitigation(mitigation, True)  # flip the one mitigation
-    scan_token = submit_sample(module, vector)
-    beacon = wait_for_beacon(scan_token, vector, BEACON_TIMEOUT_S)
-    # Reset before asserting so we don't leave state dirty if assertion fails
-    set_preset("vulnerable")
-    assert beacon is None, (
-        f"[FAIL] beacon {scan_token}/{vector} arrived even though "
-        f"mitigation '{mitigation}' was ON (expected: blocked)"
-    )
-
-
 # ---------------------------------------------------------------------------
-# Hardened preset blocks everything
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize("module,vector,mitigation", VECTOR_MITIGATION)
-def test_hardened_preset_blocks_all(module: str, vector: str, mitigation: str) -> None:
-    set_preset("hardened")
-    scan_token = submit_sample(module, vector)
-    beacon = wait_for_beacon(scan_token, vector, BEACON_TIMEOUT_S)
-    set_preset("vulnerable")  # restore
-    assert (
-        beacon is None
-    ), f"[FAIL] beacon arrived for {vector} even with protected mode"
-
-
-# ---------------------------------------------------------------------------
-# Containment: no evil-repos/ file references an external hostname
+# Containment: no sample-repos/ file references an external hostname
 # ---------------------------------------------------------------------------
 
 # Detect external URLs: http(s):// NOT followed by the listener placeholder
@@ -241,30 +174,30 @@ _EXTERNAL_URL_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Resolve evil-repos relative to the e2e dir at /e2e; in the container the
+# Resolve sample-repos relative to the e2e dir at /e2e; in the container the
 # repo root is mounted at / so we look one level up.
-_EVIL_REPOS_CANDIDATES = [
-    Path("/app/evil-repos"),  # if repo is mounted at /app
-    Path("/evil-repos"),  # if repo root is at /
-    Path(__file__).parent.parent / "evil-repos",  # local run
+_SAMPLE_REPOS_CANDIDATES = [
+    Path("/app/sample-repos"),  # if repo is mounted at /app
+    Path("/sample-repos"),  # if repo root is at /
+    Path(__file__).parent.parent / "sample-repos",  # local run
 ]
 
 
-def _find_evil_repos() -> Path | None:
-    for p in _EVIL_REPOS_CANDIDATES:
+def _find_sample_repos() -> Path | None:
+    for p in _SAMPLE_REPOS_CANDIDATES:
         if p.is_dir():
             return p
     return None
 
 
-def test_no_external_urls_in_evil_repos() -> None:
-    """No evil-repo file may contain a literal external HTTP(S) URL."""
-    evil_repos = _find_evil_repos()
-    if evil_repos is None:
-        pytest.skip("evil-repos/ directory not found in container")
+def test_no_external_urls_in_sample_repos() -> None:
+    """No sample repo file may contain a literal external HTTP(S) URL."""
+    sample_repos = _find_sample_repos()
+    if sample_repos is None:
+        pytest.skip("sample-repos/ directory not found in container")
 
     violations: list[str] = []
-    for fpath in sorted(evil_repos.rglob("*")):
+    for fpath in sorted(sample_repos.rglob("*")):
         if fpath.is_symlink():
             continue
         if not fpath.is_file():
@@ -278,7 +211,7 @@ def test_no_external_urls_in_evil_repos() -> None:
                 violations.append(f"{fpath}:{lineno}: {line.strip()}")
 
     assert not violations, (
-        "evil-repos/ contains external URL references — CONTAINMENT VIOLATION:\n"
+        "sample-repos/ contains external URL references - containment violation:\n"
         + "\n".join(violations)
     )
 
@@ -290,7 +223,6 @@ def test_no_external_urls_in_evil_repos() -> None:
 
 def test_scan_detail_includes_beacon() -> None:
     """GET /api/scans/{id} returns beacon_count > 0 after a fired vector."""
-    set_preset("vulnerable")
     r = api_post(
         "/api/scans",
         json={

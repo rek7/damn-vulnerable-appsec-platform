@@ -79,9 +79,9 @@ describe('ScanDetail', () => {
   });
 
   it('shows the no-signals note when nothing correlated', async () => {
-    const blockedScan = { ...sampleScan, beacon_count: 0 };
+    const scanWithoutSignals = { ...sampleScan, beacon_count: 0 };
     mockFetch({
-      'GET /api/scans/scan-1': () => blockedScan,
+      'GET /api/scans/scan-1': () => scanWithoutSignals,
       'GET /api/beacons?scan_token=ab12cd34ef56': () => [],
     });
     renderDetail();

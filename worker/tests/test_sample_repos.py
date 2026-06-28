@@ -1,4 +1,4 @@
-"""Containment test: no evil-repo file references a non-placeholder host/IP (§8).
+"""Containment test: no sample repo file references a non-placeholder host/IP.
 
 Also verifies that every bundled sample repo exists, carries the placeholders,
 and templates cleanly into a workdir.
@@ -16,7 +16,7 @@ from app import config, fetch, templating
 # host token (everything up to the first ``:``, ``/`` or whitespace) and reject
 # any URL that hard-codes a real host directly after the scheme.
 _URL_RE = re.compile(r"https?://([^/\s:'\"]*)")
-# IPv4 literals are never allowed anywhere in evil-repos.
+# IPv4 literals are never allowed anywhere in sample repos.
 _IPV4_RE = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 
 # Substrings that legitimately appear as the host right after ``://`` in payload
@@ -32,7 +32,7 @@ _ALLOWED_URL_HOST_TOKENS = {
 
 
 def _iter_repo_files() -> list[Path]:
-    root = Path(__file__).resolve().parent.parent.parent / "evil-repos"
+    root = Path(__file__).resolve().parent.parent.parent / "sample-repos"
     files = []
     for path in root.rglob("*"):
         if path.is_file() and not path.is_symlink():
@@ -40,7 +40,7 @@ def _iter_repo_files() -> list[Path]:
     return files
 
 
-def test_evil_repos_have_no_external_host_urls() -> None:
+def test_sample_repos_have_no_external_host_urls() -> None:
     offenders: list[str] = []
     for path in _iter_repo_files():
         try:
@@ -54,7 +54,7 @@ def test_evil_repos_have_no_external_host_urls() -> None:
     assert not offenders, f"external host URL literals found: {offenders}"
 
 
-def test_evil_repos_have_no_ipv4_literals() -> None:
+def test_sample_repos_have_no_ipv4_literals() -> None:
     offenders: list[str] = []
     for path in _iter_repo_files():
         try:
@@ -69,12 +69,12 @@ def test_evil_repos_have_no_ipv4_literals() -> None:
 def test_each_module_sample_repo_exists() -> None:
     for module, entries in fetch.MODULE_SAMPLE_REPOS.items():
         for _vector, rel in entries:
-            repo = config.evil_repos_root() / rel
+            repo = config.sample_repos_root() / rel
             assert repo.is_dir(), f"missing sample repo for {module}: {repo}"
 
 
 def test_symlink_repo_has_leak_symlink() -> None:
-    repo = config.evil_repos_root() / "secrets" / "symlink"
+    repo = config.sample_repos_root() / "secrets" / "symlink"
     leak = repo / "leak"
     assert leak.is_symlink(), "secrets/symlink/leak must be a symlink"
 
@@ -94,7 +94,6 @@ def test_sample_copy_and_template_substitutes_placeholders(tmp_path: Path) -> No
         vector="checkov_external_checks",
         listener_host="listener",
         listener_port=9000,
-        block_egress=False,
     )
     templating.apply_to_tree(tmp_path, subs)
     payload = (tmp_path / "checkov_checks" / "extra_check.py").read_text()
@@ -103,16 +102,14 @@ def test_sample_copy_and_template_substitutes_placeholders(tmp_path: Path) -> No
     assert "listener" in payload
 
 
-def test_block_egress_templating_uses_blackhole(tmp_path: Path) -> None:
+def test_sample_copy_uses_listener_placeholder(tmp_path: Path) -> None:
     fetch.copy_sample("sca", "setup_py_exec", tmp_path)
     subs = templating.build_substitutions(
         scan_token="tok",
         vector="setup_py_exec",
         listener_host="listener",
         listener_port=9000,
-        block_egress=True,
     )
     templating.apply_to_tree(tmp_path, subs)
     payload = (tmp_path / "setup.py").read_text()
-    assert "egress.blocked.invalid" in payload
-    assert "listener" not in payload
+    assert "listener" in payload

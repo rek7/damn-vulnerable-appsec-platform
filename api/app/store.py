@@ -13,17 +13,16 @@ from collections.abc import AsyncIterator, Sequence
 from contextlib import asynccontextmanager
 from typing import Any
 
-from .models import Beacon, Config, Scan
+from .models import Beacon, Scan
 
 
 class Store:
-    """Thread/async-safe in-memory store for scans, beacons, and config."""
+    """Thread/async-safe in-memory store for scans and beacons."""
 
     def __init__(self) -> None:
         self._lock = asyncio.Lock()
         self._scans: dict[str, Scan] = {}
         self._beacons: list[Beacon] = []
-        self._config: Config = Config()
 
     async def startup(self) -> None:
         return None
@@ -33,23 +32,6 @@ class Store:
 
     async def healthcheck(self) -> bool:
         return True
-
-    # ------------------------------------------------------------------
-    # Config
-    # ------------------------------------------------------------------
-
-    async def get_config(self) -> Config:
-        async with self._lock:
-            return self._config.model_copy()
-
-    async def set_config(self, config: Config) -> Config:
-        async with self._lock:
-            self._config = config.model_copy()
-            return self._config.model_copy()
-
-    # ------------------------------------------------------------------
-    # Scans
-    # ------------------------------------------------------------------
 
     async def create_scan(self, scan: Scan) -> Scan:
         async with self._lock:
@@ -177,15 +159,6 @@ class PostgresStore(Store):
         async with self._connection() as conn:
             await conn.execute(
                 """
-                CREATE TABLE IF NOT EXISTS app_config (
-                    id boolean PRIMARY KEY DEFAULT TRUE CHECK (id),
-                    data jsonb NOT NULL,
-                    updated_at timestamptz NOT NULL DEFAULT now()
-                )
-                """
-            )
-            await conn.execute(
-                """
                 CREATE TABLE IF NOT EXISTS scans (
                     id text PRIMARY KEY,
                     scan_token text NOT NULL,
@@ -218,14 +191,6 @@ class PostgresStore(Store):
                 ON beacons (scan_token)
                 """
             )
-            await conn.execute(
-                """
-                INSERT INTO app_config (id, data)
-                VALUES (TRUE, %s)
-                ON CONFLICT (id) DO NOTHING
-                """,
-                (self._jsonb(Config().model_dump(mode="json")),),
-            )
             await self._seed_integration_credentials(conn)
 
     async def healthcheck(self) -> bool:
@@ -235,28 +200,6 @@ class PostgresStore(Store):
         except Exception:
             return False
         return True
-
-    async def get_config(self) -> Config:
-        async with self._connection() as conn:
-            cursor = await conn.execute("SELECT data FROM app_config WHERE id = TRUE")
-            row = await cursor.fetchone()
-            if row is None:
-                return Config()
-            return Config.model_validate(self._object(row[0]))
-
-    async def set_config(self, config: Config) -> Config:
-        payload = config.model_dump(mode="json")
-        async with self._connection() as conn:
-            await conn.execute(
-                """
-                INSERT INTO app_config (id, data, updated_at)
-                VALUES (TRUE, %s, now())
-                ON CONFLICT (id) DO UPDATE
-                SET data = EXCLUDED.data, updated_at = now()
-                """,
-                (self._jsonb(payload),),
-            )
-        return config.model_copy()
 
     async def create_scan(self, scan: Scan) -> Scan:
         payload = scan.model_dump(mode="json")

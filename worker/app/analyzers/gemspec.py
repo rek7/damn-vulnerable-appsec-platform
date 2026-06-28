@@ -1,8 +1,7 @@
 """gemspec analyzer (vector ``gemspec_eval``).
 
-Trigger: a ``*.gemspec`` in the repo. Vulnerable path evaluates the gemspec via
-Ruby (``Gem::Specification.load``), executing the file. Mitigated path
-(``disable_extensibility``) parses name/version statically with a regex.
+Trigger: a ``*.gemspec`` in the repo. The analyzer evaluates the gemspec via
+Ruby (``Gem::Specification.load``), executing project package metadata code.
 """
 
 from __future__ import annotations
@@ -10,7 +9,6 @@ from __future__ import annotations
 import shutil
 import subprocess
 
-from .. import sanitize
 from ..models import AnalyzerResult
 from . import AnalyzerContext
 from ._common import Timer, add_step, find_by_suffix
@@ -31,31 +29,10 @@ def run(ctx: AnalyzerContext) -> AnalyzerResult:
             duration_ms=0,
         )
 
-    if ctx.mitigations.disable_extensibility:
-        with Timer() as timer:
-            name, version = sanitize.parse_gemspec_metadata(
-                gemspec_path.read_text(encoding="utf-8")
-            )
-        add_step(
-            ctx.steps,
-            "info",
-            "gemspec: disable_extensibility ON -- parsed metadata statically, "
-            "no eval",
-        )
-        return AnalyzerResult(
-            name=NAME,
-            vector=VECTOR,
-            triggered=True,
-            status="blocked",
-            summary=f"static parse: name={name} version={version}",
-            duration_ms=timer.ms,
-        )
-
     add_step(
         ctx.steps,
         "warn",
-        "gemspec: evaluating gemspec via Ruby Gem::Specification.load "
-        "(vulnerable path)",
+        "gemspec: evaluating gemspec via Ruby Gem::Specification.load",
     )
     ruby_bin = shutil.which("ruby")
     if ruby_bin is None:

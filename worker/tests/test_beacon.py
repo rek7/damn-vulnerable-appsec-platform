@@ -42,7 +42,7 @@ def test_build_exfil_joins_secrets_and_token() -> None:
 
 
 def test_build_exfil_empty_when_credentials_stripped() -> None:
-    # strip_credentials => empty seeds + empty token => empty exfil.
+    # Empty seed inputs produce empty exfil.
     assert beacon.build_exfil({}, "") == ""
 
 
@@ -55,7 +55,7 @@ def test_build_beacon_url_shape() -> None:
 
 
 def test_send_beacon_refuses_blocked_host() -> None:
-    # Loopback / metadata / blackhole must be refused before any socket opens.
+    # Loopback / metadata / non-listener hosts are refused before any socket opens.
     assert beacon.send_beacon("127.0.0.1", 9000, "tok", "v", "aa") is False
     assert beacon.send_beacon("169.254.169.254", 80, "tok", "v", "aa") is False
-    assert beacon.send_beacon("egress.blocked.invalid", 9000, "tok", "v", "aa") is False
+    assert beacon.send_beacon("example.com", 9000, "tok", "v", "aa") is False

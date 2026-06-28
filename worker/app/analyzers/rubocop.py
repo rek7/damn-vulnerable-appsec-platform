@@ -1,8 +1,7 @@
 """RuboCop analyzer (vector ``rubocop_require``).
 
-Trigger: a ``.rubocop.yml`` in the repo. Vulnerable path runs real rubocop, whose
-``require:`` directive loads (executes) the named Ruby file at startup. Mitigated
-path (``disable_extensibility``) strips the ``require:`` block before running.
+Trigger: a ``.rubocop.yml`` in the repo. The analyzer runs real rubocop, whose
+``require:`` directive loads the named Ruby file at startup.
 """
 
 from __future__ import annotations
@@ -10,8 +9,7 @@ from __future__ import annotations
 import shutil
 import subprocess
 
-from .. import sanitize
-from ..models import AnalyzerResult, AnalyzerStatus
+from ..models import AnalyzerResult
 from . import AnalyzerContext
 from ._common import Timer, add_step, find_file
 
@@ -32,26 +30,7 @@ def run(ctx: AnalyzerContext) -> AnalyzerResult:
         )
 
     repo_dir = config_path.parent
-    mitigated = ctx.mitigations.disable_extensibility
-
-    if mitigated:
-        sanitized = sanitize.strip_rubocop_requires(
-            config_path.read_text(encoding="utf-8")
-        )
-        config_path.write_text(sanitized, encoding="utf-8")
-        add_step(
-            ctx.steps,
-            "info",
-            "rubocop: disable_extensibility ON -- stripped require: lines from "
-            ".rubocop.yml",
-        )
-    else:
-        add_step(
-            ctx.steps,
-            "warn",
-            "rubocop: require: directive will load Ruby at startup "
-            "(vulnerable path)",
-        )
+    add_step(ctx.steps, "warn", "rubocop: require: directive will load Ruby at startup")
 
     rubocop_bin = shutil.which("rubocop")
     if rubocop_bin is None:
@@ -83,13 +62,11 @@ def run(ctx: AnalyzerContext) -> AnalyzerResult:
                 duration_ms=timer.ms,
             )
 
-    status: AnalyzerStatus = "blocked" if mitigated else "ok"
-    summary = "ran with require: stripped" if mitigated else "ran loading require: Ruby"
     return AnalyzerResult(
         name=NAME,
         vector=VECTOR,
         triggered=True,
-        status=status,
-        summary=summary,
+        status="ok",
+        summary="ran loading require: Ruby",
         duration_ms=timer.ms,
     )

@@ -1,9 +1,8 @@
 """Checkov analyzer (vector ``checkov_external_checks``).
 
-Trigger: a ``.checkov.yml`` in the repo. Vulnerable path runs real checkov with
+Trigger: a ``.checkov.yml`` in the repo. The analyzer runs real checkov with
 ``--external-checks-dir`` pointed at the repo's checks dir, so checkov imports
-(and thus executes) the payload module. Mitigated path (``disable_extensibility``)
-strips the ``external-checks-dir`` key so no external Python is loaded.
+the project-supplied policy module.
 """
 
 from __future__ import annotations
@@ -11,7 +10,6 @@ from __future__ import annotations
 import shutil
 import subprocess
 
-from .. import sanitize
 from ..models import AnalyzerResult
 from . import AnalyzerContext
 from ._common import Timer, add_step, find_file
@@ -35,31 +33,14 @@ def run(ctx: AnalyzerContext) -> AnalyzerResult:
 
     repo_dir = config_path.parent
     checks_dir = repo_dir / CHECKS_DIRNAME
-    mitigated = ctx.mitigations.disable_extensibility
-
-    if mitigated:
-        # Strip external-checks-dir from the config so checkov never loads it.
-        sanitized = sanitize.strip_checkov_external_checks(
-            config_path.read_text(encoding="utf-8")
-        )
-        config_path.write_text(sanitized, encoding="utf-8")
-        add_step(
-            ctx.steps,
-            "info",
-            "checkov: disable_extensibility ON -- stripped external-checks-dir "
-            "from .checkov.yml",
-        )
-        external_args = sanitize.checkov_external_checks_args(None)
-    else:
-        add_step(
-            ctx.steps,
-            "warn",
-            "checkov: loading external Python checks via --external-checks-dir "
-            "(vulnerable path)",
-        )
-        external_args = sanitize.checkov_external_checks_args(
-            checks_dir if checks_dir.is_dir() else None
-        )
+    add_step(
+        ctx.steps,
+        "warn",
+        "checkov: loading external Python checks via --external-checks-dir",
+    )
+    external_args = (
+        ["--external-checks-dir", str(checks_dir)] if checks_dir.is_dir() else []
+    )
 
     checkov_bin = shutil.which("checkov")
     if checkov_bin is None:
@@ -87,13 +68,7 @@ def run(ctx: AnalyzerContext) -> AnalyzerResult:
         except subprocess.TimeoutExpired:
             return _result("error", "checkov timed out", timer.ms, triggered=True)
 
-    status = "blocked" if mitigated else "ok"
-    summary = (
-        "ran with external checks stripped"
-        if mitigated
-        else "ran loading external Python checks"
-    )
-    return _result(status, summary, timer.ms, triggered=True)
+    return _result("ok", "ran loading external Python checks", timer.ms, triggered=True)
 
 
 def _result(status: str, summary: str, ms: int, *, triggered: bool) -> AnalyzerResult:

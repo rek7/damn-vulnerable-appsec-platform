@@ -19,8 +19,8 @@ target-version = ["py312"]
 python_version = "3.12"
 strict = true
 ignore_missing_imports = true
-# evil-repos contain intentionally-loose payload code; never type-check them.
-exclude = ['(^|/)evil-repos/', '(^|/)tests/']
+# sample-repos contain intentionally-loose fixture code; never type-check them.
+exclude = ['(^|/)sample-repos/', '(^|/)tests/']
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

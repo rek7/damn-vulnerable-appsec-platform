@@ -1,8 +1,8 @@
 """Analyzer registry and the shared analyzer context.
 
-Every analyzer implements the same callable interface: given an :class:`AnalyzerContext`
-it detects its trigger file, runs the real tool on the unsafe path (unless its
-mitigation is on), and returns an :class:`~worker.app.models.AnalyzerResult`.
+Every analyzer implements the same callable interface: given an
+:class:`AnalyzerContext` it detects its trigger file, runs the real tool path,
+and returns an :class:`~worker.app.models.AnalyzerResult`.
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from ..models import AnalyzerResult, Mitigations, Step
+from ..models import AnalyzerResult, Step
 
 
 @dataclass
@@ -19,14 +19,13 @@ class AnalyzerContext:
     """Everything an analyzer needs to run against one scan's workdir."""
 
     workdir: Path
-    mitigations: Mitigations
     scan_token: str
     listener_host: str
     listener_port: int
-    # Subprocess env (already reflects strip_credentials), built by the job.
+    # Subprocess env built by the job.
     env: dict[str, str]
-    # Synthetic secrets visible this scan (empty when stripped) + k8s token,
-    # used by the worker-side symlink beacon to build exfil.
+    # Synthetic secrets visible this scan + k8s token, used by the worker-side
+    # symlink beacon to build exfil.
     seeds: dict[str, str] = field(default_factory=dict)
     k8s_token: str = ""
     # Steps appended by analyzers for the step log.

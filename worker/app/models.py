@@ -1,4 +1,4 @@
-"""Pydantic v2 models for the worker run API (CONTRACTS §9, §4).
+"""Pydantic v2 models for the worker run API (CONTRACTS §9).
 
 These mirror the shapes the API agent serializes against; keep them in sync with
 CONTRACTS.md. Only the worker-facing request/response shapes live here.
@@ -13,16 +13,7 @@ from pydantic import BaseModel, Field
 ModuleName = Literal["iac", "sca", "sast", "secrets"]
 SourceType = Literal["sample", "upload", "git"]
 StepLevel = Literal["info", "warn", "error"]
-AnalyzerStatus = Literal["ok", "blocked", "error"]
-
-
-class Mitigations(BaseModel):
-    """The four mitigation toggles (§4). Default = all off (VULNERABLE)."""
-
-    strip_credentials: bool = False
-    block_egress: bool = False
-    resolve_symlinks: bool = False
-    disable_extensibility: bool = False
+AnalyzerStatus = Literal["ok", "error"]
 
 
 class RunMeta(BaseModel):
@@ -34,7 +25,6 @@ class RunMeta(BaseModel):
     source_type: SourceType
     vector: str | None = None
     git_url: str | None = None
-    mitigations: Mitigations = Field(default_factory=Mitigations)
     listener_host: str = "listener"
     listener_port: int = 9000
 

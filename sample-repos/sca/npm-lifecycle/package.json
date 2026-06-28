@@ -1,0 +1,9 @@
+{
+  "name": "metadata-review-sample",
+  "version": "0.0.1",
+  "description": "Sample package metadata for dependency workflow review",
+  "private": true,
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  }
+}

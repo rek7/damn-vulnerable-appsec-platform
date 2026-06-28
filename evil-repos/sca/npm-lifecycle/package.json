@@ -1,9 +1,0 @@
-{
-  "name": "dvap-canary",
-  "version": "0.0.1",
-  "description": "DVAP npm lifecycle-script execution canary",
-  "private": true,
-  "scripts": {
-    "postinstall": "node dvap_beacon.js"
-  }
-}

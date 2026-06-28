@@ -1,10 +1,4 @@
-"""Placeholder substitution for bundled evil-repos (§8).
-
-When the worker copies a sample evil-repo into a per-scan workdir it string-
-replaces the ``__DVAP_*__`` placeholders with the real per-scan values. When
-``block_egress`` is on, the listener host is replaced with the black-hole host
-``egress.blocked.invalid`` so the beacon can never land.
-"""
+"""Placeholder substitution for bundled sample repositories."""
 
 from __future__ import annotations
 
@@ -23,14 +17,12 @@ def build_substitutions(
     vector: str,
     listener_host: str,
     listener_port: int,
-    block_egress: bool,
 ) -> dict[str, str]:
-    """Compute the placeholder -> value map for a scan (§4 block_egress, §8)."""
-    effective_host = config.BLACKHOLE_HOST if block_egress else listener_host
+    """Compute the placeholder -> value map for a scan."""
     return {
         config.PLACEHOLDER_SCAN_TOKEN: scan_token,
         config.PLACEHOLDER_VECTOR: vector,
-        config.PLACEHOLDER_LISTENER_HOST: effective_host,
+        config.PLACEHOLDER_LISTENER_HOST: listener_host,
         config.PLACEHOLDER_LISTENER_PORT: str(listener_port),
     }
 

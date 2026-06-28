@@ -80,7 +80,6 @@ async def _run_scan(scan: Scan, archive_bytes: bytes | None = None) -> Scan:
             source_type=scan.source.type,
             vector=scan.vector,
             git_url=scan.source.ref if scan.source.type == "git" else None,
-            mitigations=scan.mitigations,
             archive_bytes=archive_bytes,
             archive_filename=archive_filename,
         )
@@ -117,8 +116,7 @@ async def _create_and_run(
     source: ScanSource,
     archive_bytes: bytes | None = None,
 ) -> Scan:
-    config = await store.get_config()
-    scan = _make_scan(module, vector, source, config)
+    scan = _make_scan(module, vector, source)
     scan = await store.create_scan(scan)
     await hub.broadcast(ScanUpdateEnvelope(scan=scan).model_dump())
     return await _run_scan(scan, archive_bytes=archive_bytes)
@@ -199,14 +197,8 @@ def _make_scan(
     module: str,
     vector: str | None,
     source: ScanSource,
-    mitigations_snapshot: object,
 ) -> Scan:
     """Create a new Scan in queued state with a fresh scan_token."""
-    from ..models import Config
-
-    if not isinstance(mitigations_snapshot, Config):
-        raise TypeError("mitigations_snapshot must be a Config instance")
-
     now = utcnow_iso()
     return Scan(
         id=str(uuid.uuid4()),
@@ -215,7 +207,6 @@ def _make_scan(
         vector=vector,
         source=source,
         status="queued",
-        mitigations=mitigations_snapshot,
         created_at=now,
         updated_at=now,
     )

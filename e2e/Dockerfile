@@ -6,6 +6,6 @@ COPY e2e/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY e2e/ .
-COPY evil-repos/ /evil-repos/
+COPY sample-repos/ /sample-repos/
 
 CMD ["pytest", "-v", "--tb=short", "test_e2e.py"]

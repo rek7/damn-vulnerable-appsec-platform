@@ -1,14 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   ApiError,
-  applyPreset,
   createScan,
   createUploadScan,
-  getConfig,
   listBeacons,
-  updateConfig,
 } from './client';
-import { hardenedConfig, sampleScan, vulnerableConfig } from '../test/fixtures';
+import { sampleScan } from '../test/fixtures';
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -50,7 +47,7 @@ describe('api client', () => {
   it('createUploadScan sends multipart with meta + archive', async () => {
     const fetchMock = fetchMockOf(() => jsonResponse(sampleScan));
     vi.stubGlobal('fetch', fetchMock);
-    const file = new File(['payload'], 'evil.zip', { type: 'application/zip' });
+    const file = new File(['payload'], 'sample.zip', { type: 'application/zip' });
 
     await createUploadScan({ module: 'sca', source_type: 'upload' }, file);
 
@@ -74,40 +71,13 @@ describe('api client', () => {
     let i = 0;
     const fetchMock = fetchMockOf(() => responses[i++]);
     vi.stubGlobal('fetch', fetchMock);
-    const file = new File(['payload'], 'evil.zip', { type: 'application/zip' });
+    const file = new File(['payload'], 'sample.zip', { type: 'application/zip' });
 
     await createUploadScan({ module: 'sca', source_type: 'upload' }, file);
 
     expect(fetchMock.mock.calls).toHaveLength(2);
     expect(fetchMock.mock.calls[0][0]).toBe('/api/scans');
     expect(fetchMock.mock.calls[1][0]).toBe('/api/scans/upload');
-  });
-
-  it('getConfig and updateConfig hit /api/config', async () => {
-    const responses = [
-      jsonResponse(vulnerableConfig),
-      jsonResponse({ ...vulnerableConfig, block_egress: true }),
-    ];
-    let i = 0;
-    const fetchMock = fetchMockOf(() => responses[i++]);
-    vi.stubGlobal('fetch', fetchMock);
-
-    expect(await getConfig()).toEqual(vulnerableConfig);
-
-    const updated = await updateConfig({ block_egress: true });
-    expect(updated.block_egress).toBe(true);
-    const [url, init] = fetchMock.mock.calls[1];
-    expect(url).toBe('/api/config');
-    expect(init?.method).toBe('PUT');
-  });
-
-  it('applyPreset POSTs to /api/config/preset/{name}', async () => {
-    const fetchMock = fetchMockOf(() => jsonResponse(hardenedConfig));
-    vi.stubGlobal('fetch', fetchMock);
-
-    const cfg = await applyPreset('hardened');
-    expect(cfg).toEqual(hardenedConfig);
-    expect(fetchMock.mock.calls[0][0]).toBe('/api/config/preset/hardened');
   });
 
   it('listBeacons appends filter query params', async () => {
@@ -125,6 +95,8 @@ describe('api client', () => {
     const fetchMock = vi.fn(async () => jsonResponse({ detail: 'bad module' }, 422));
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(getConfig()).rejects.toBeInstanceOf(ApiError);
+    await expect(createScan({ module: 'iac', source_type: 'sample' })).rejects.toBeInstanceOf(
+      ApiError,
+    );
   });
 });

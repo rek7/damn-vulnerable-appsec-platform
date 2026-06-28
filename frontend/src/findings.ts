@@ -3,7 +3,7 @@ import { displayOperationalText, sourceDisplayName } from './presentation';
 import type { AnalyzerResult, Beacon, Scan } from './types';
 
 export type FindingSeverity = 'critical' | 'high' | 'medium' | 'info';
-export type FindingStatus = 'open' | 'prevented' | 'error' | 'observed';
+export type FindingStatus = 'open' | 'error' | 'observed';
 
 export interface Finding {
   id: string;
@@ -105,8 +105,7 @@ const SEVERITY_RANK: Record<FindingSeverity, number> = {
 function statusForAnalyzer(analyzer: AnalyzerResult): FindingStatus {
   if (analyzer.status === 'error') return 'error';
   if (analyzer.triggered) return 'open';
-  if (analyzer.status === 'blocked') return 'prevented';
-  return 'prevented';
+  return 'observed';
 }
 
 function templateFor(vector: string): FindingTemplate {
@@ -136,7 +135,7 @@ export function findingsForScan(scan: Scan, beacons: Beacon[] = []): Finding[] {
               name: scan.module,
               vector: scan.vector,
               triggered: scan.beacon_count > 0,
-              status: scan.beacon_count > 0 ? 'ok' : 'blocked',
+              status: 'ok',
               summary: scan.result,
               duration_ms: 0,
             } satisfies AnalyzerResult,
@@ -181,7 +180,6 @@ export function highestSeverity(findings: Finding[]): FindingSeverity | null {
 
 export function findingStatusSummary(findings: Finding[]): {
   open: number;
-  prevented: number;
   error: number;
   observed: number;
 } {
@@ -190,7 +188,7 @@ export function findingStatusSummary(findings: Finding[]): {
       acc[finding.status] += 1;
       return acc;
     },
-    { open: 0, prevented: 0, error: 0, observed: 0 },
+    { open: 0, error: 0, observed: 0 },
   );
 }
 
@@ -211,8 +209,6 @@ export function statusClass(status: FindingStatus): string {
   switch (status) {
     case 'open':
       return 'border-danger/60 bg-danger/10 text-danger';
-    case 'prevented':
-      return 'border-neon/60 bg-neon/10 text-neon';
     case 'error':
       return 'border-amber/60 bg-amber/10 text-amber';
     case 'observed':

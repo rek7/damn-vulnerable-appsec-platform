@@ -15,17 +15,7 @@ export type Vector =
 export type ScanStatus = 'queued' | 'running' | 'completed' | 'failed';
 export type SourceType = 'sample' | 'upload' | 'git';
 export type StepLevel = 'info' | 'warn' | 'error';
-export type AnalyzerStatus = 'ok' | 'blocked' | 'error';
-
-// §4 — the four mitigation toggles.
-export interface Config {
-  strip_credentials: boolean;
-  block_egress: boolean;
-  resolve_symlinks: boolean;
-  disable_extensibility: boolean;
-}
-
-export type MitigationKey = keyof Config;
+export type AnalyzerStatus = 'ok' | 'error';
 
 export interface ScanSource {
   type: SourceType;
@@ -54,7 +44,6 @@ export interface Scan {
   vector: string | null;
   source: ScanSource;
   status: ScanStatus;
-  mitigations: Config; // snapshot at scan time
   result: string;
   analyzers: AnalyzerResult[];
   steps: Step[];
