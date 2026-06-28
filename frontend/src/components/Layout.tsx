@@ -20,7 +20,7 @@ export function Layout() {
             </span>
             <span className="min-w-0">
               <span className="block text-sm font-bold tracking-tight">DVAP</span>
-              <span className="block text-xs text-white/60">Application security management</span>
+              <span className="block text-xs text-white/60">Assessment workspace</span>
             </span>
           </NavLink>
           <nav className="flex flex-wrap gap-1 px-3 pb-3 lg:flex-col lg:gap-1">
