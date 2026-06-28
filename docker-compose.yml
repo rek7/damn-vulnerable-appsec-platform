@@ -120,8 +120,6 @@ services:
     environment:
       DVAP_SEEDS_FILE: /app/seeds/synthetic.env
       DVAP_EXTRA_SEEDS_FILE: /app/seeds/canarytokens.local.env
-      DVAP_DATABASE_URL: ${DVAP_DATABASE_URL:-postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap}
-      LATERAL_MOVEMENT_DB_URL: ${LATERAL_MOVEMENT_DB_URL:-postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap}
     env_file:
       - path: ./seeds/synthetic.env
         required: true
@@ -175,7 +173,6 @@ services:
     environment:
       DVAP_API_URL: http://api:8000
       DVAP_DATABASE_URL: ${DVAP_DATABASE_URL:-postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap}
-      LATERAL_MOVEMENT_DB_URL: ${LATERAL_MOVEMENT_DB_URL:-postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap}
     networks:
       - dvap-net
     depends_on:

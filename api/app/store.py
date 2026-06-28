@@ -525,7 +525,7 @@ class PostgresStore(Store):
                 "postgres_url",
                 "application-platform",
                 cls._env_value(
-                    "LATERAL_MOVEMENT_DB_URL",
+                    "APP_DATABASE_URL",
                     "DVAP_DATABASE_URL",
                     "DATABASE_URL",
                     fallback=(

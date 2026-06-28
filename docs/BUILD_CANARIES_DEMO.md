@@ -106,7 +106,7 @@ id
 hostname
 ps aux
 ip route
-psql "$LATERAL_MOVEMENT_DB_URL" -c "SELECT service, credential_type, owner FROM integration_credentials ORDER BY service, credential_type;"
+psql "$APP_DATABASE_URL" -c "SELECT service, credential_type, owner FROM integration_credentials ORDER BY service, credential_type;"
 exit
 ```
 

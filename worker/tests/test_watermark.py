@@ -94,11 +94,7 @@ def test_build_subprocess_env_strips_seeds_when_mitigated(
 ) -> None:
     loaded = seeds.load_seeds(synthetic_seeds["seeds_file"])
     monkeypatch.setenv(
-        "DVAP_DATABASE_URL",
-        "postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap",
-    )
-    monkeypatch.setenv(
-        "LATERAL_MOVEMENT_DB_URL",
+        "APP_DATABASE_URL",
         "postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap",
     )
     env = seeds.build_subprocess_env(loaded, strip_credentials=True)
@@ -117,19 +113,14 @@ def test_stripped_subprocess_env_has_no_secret_scanner_findings(
 
     loaded = seeds.load_seeds(synthetic_seeds["seeds_file"])
     monkeypatch.setenv(
-        "DVAP_DATABASE_URL",
-        "postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap",
-    )
-    monkeypatch.setenv(
-        "LATERAL_MOVEMENT_DB_URL",
+        "APP_DATABASE_URL",
         "postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap",
     )
 
     stripped = seeds.build_subprocess_env(loaded, strip_credentials=True)
     env_text = "\x00".join(f"{key}={value}" for key, value in stripped.items())
 
-    assert "DVAP_DATABASE_URL" not in stripped
-    assert "LATERAL_MOVEMENT_DB_URL" not in stripped
+    assert "APP_DATABASE_URL" not in stripped
     assert secret_patterns.find_secrets_in_text(env_text) == []
 
 

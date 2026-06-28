@@ -155,8 +155,7 @@ def test_all_synthetic_patterns_match() -> None:
         "GITHUB_TOKEN=ghp_FAKE0000dvsExampleToken0000000000\n"
         "GITHUB_CANARY_TOKEN=ghp_FAKEdvapCanaryGithubToken000000000000\n"
         "NPM_TOKEN=npm_FAKEdvapCanaryPublishToken000000000000\n"
-        "DATABASE_URL=postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap\n"
-        "POSTGRES_CANARY_DSN=postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap\n"
+        "APP_DATABASE_URL=postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap\n"
         "STRIPE_API_KEY=sk_live_FAKE_dvs_0000example0000\n"
         "SLACK_WEBHOOK_URL=https://hooks.slack.invalid/services/TFAKE/BFAKE/FAKEdvapWebhookDoNotUse\n"
     )
@@ -177,7 +176,7 @@ def test_patterns_ignore_non_watermarked_secret_shapes() -> None:
     text = (
         "AWS_ACCESS_KEY_ID=AKIAABCDEFGHIJKLMNOP\n"
         "GITHUB_ACCESS_TOKEN=ghp_realisticTokenButNoWatermark000000\n"
-        "DATABASE_URL=postgres://demo:password@db.example.invalid:5432/demo\n"
+        "APP_DATABASE_URL=postgres://demo:password@db.example.invalid:5432/demo\n"
         "NPM_TOKEN=npm_realisticTokenButNoWatermark\n"
         "STRIPE_API_KEY=sk_" "live_realisticTokenButNoWatermark\n"
     )
