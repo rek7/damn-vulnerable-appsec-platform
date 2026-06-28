@@ -77,7 +77,7 @@ Sensitive-looking values should be masked in the operator UI.
 - Assessment detail renders analyzer status, step logs, findings, and correlated evidence.
 - Finding cards use product-facing assessment labels rather than backend identifiers.
 - Documentation routes are available at `/docs` and `/docs/:docId`.
-- The `/docs` index includes crawler-readable repository signals, build systems, analyzer configuration, policy inputs, and workflow references.
+- Documentation includes repository discovery guidance for inferred coverage and an integration catalog for explicit scanner, build, package, infrastructure, and delivery integrations.
 
 ## Test Expectations
 

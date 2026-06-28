@@ -121,13 +121,20 @@ const DOCS: ReferenceDoc[] = [
     category: 'Start here',
     title: 'Project discovery',
     summary:
-      'Use repository structure, manifests, lockfiles, and service metadata to decide which assessment programs apply.',
+      'Use repository structure, manifests, lockfiles, and service metadata to infer which assessment programs apply.',
     sections: [
       {
         title: 'Detection model',
         paragraphs: [
           'Project discovery is intentionally conservative. The platform prefers durable repository evidence over naming conventions, so it looks for manifests, build descriptors, policy directories, container build context, API schemas, and documentation roots.',
           'When multiple ecosystems are present, discovery records all candidates and lets policy decide whether each program is required, optional, or informational.',
+        ],
+      },
+      {
+        title: 'Signals that imply coverage',
+        paragraphs: [
+          'A repository does not need to name every tool it uses for the platform to build an assessment profile. Files such as `package.json`, `pnpm-lock.yaml`, `pyproject.toml`, `Pipfile`, `Gemfile`, `*.gemspec`, `go.mod`, `pom.xml`, `build.gradle`, `Cargo.toml`, and `composer.json` are enough to infer package inventory requirements.',
+          'Infrastructure and delivery signals work the same way. `Dockerfile`, `docker-compose.yml`, `Chart.yaml`, `kustomization.yaml`, `main.tf`, `template.yaml`, `buildspec.yml`, `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, and `.circleci/config.yml` tell the platform which review programs are likely relevant before a team configures named integrations.',
         ],
       },
       {
@@ -177,22 +184,29 @@ const DOCS: ReferenceDoc[] = [
   {
     slug: 'supported-integrations',
     category: 'Programs',
-    title: 'Program coverage overview',
+    title: 'Integration catalog',
     summary:
-      'Understand how assessment programs map repository evidence to findings, ownership, and reporting.',
+      'Review supported scanners, package managers, build systems, infrastructure formats, and delivery integrations.',
     sections: [
       {
-        title: 'Coverage model',
+        title: 'Code and scanner integrations',
         paragraphs: [
-          'Assessment programs are grouped by the type of evidence they produce: code review, dependency inventory, infrastructure policy, container metadata, secret-like material, documentation metadata, and release automation.',
-          'The platform stores program output in a normalized finding model. This lets teams compare status, owner, severity, exception state, and remediation evidence without depending on the shape of one upstream report.',
+          'Code review and scanner coverage includes Semgrep, CodeQL, SonarQube, Bandit, Brakeman, ESLint, RuboCop, Checkov, tfsec, KICS, OPA, Conftest, Trivy, Grype, Hadolint, Gitleaks, TruffleHog, detect-secrets, Safety, Syft, and SPDX SBOM inputs.',
+          'Integrations can be configured directly or discovered from repository configuration. The assessment record keeps the original tool name, normalized finding category, evidence path, owner, severity, and review state together.',
         ],
       },
       {
-        title: 'Repository evidence',
+        title: 'Package and build ecosystems',
         paragraphs: [
-          'Coverage is inferred from files, directories, and workflow metadata. Examples include analyzer configuration, package manifests, lockfiles, policy bundles, deployment templates, container build context, generated inventories, and documentation roots.',
-          'A program can be present even when no named integration is configured. In that case, the assessment record still captures the inputs, outputs, and policy decision used for review.',
+          'Dependency and build coverage includes npm, pnpm, Yarn, pip, Poetry, Pipenv, Bundler, RubyGems, Composer, Cargo, Go modules, Maven, Gradle, Make, CMake, Bazel, webpack, and Docker build context.',
+          'The platform uses manifests and lockfiles to decide which inventory jobs should run, then links each finding back to the source file that introduced the package or build behavior.',
+        ],
+      },
+      {
+        title: 'Delivery and infrastructure systems',
+        paragraphs: [
+          'Delivery and infrastructure coverage includes Kubernetes, Terraform, Helm, Kustomize, CloudFormation, Ansible, Packer, GitHub Actions, GitLab CI, Jenkins, CircleCI, Travis CI, Azure Pipelines, Bitbucket Pipelines, AWS CodeBuild, and Google Cloud Build.',
+          'These integrations are treated as evidence sources, not separate application records. Their findings remain attached to the owning application so release gates, exceptions, and reporting stay consistent.',
         ],
       },
       {
@@ -1008,29 +1022,11 @@ const DOC_GROUPS = [
   },
 ];
 
-const FEATURED_SLUGS = ['quickstart', 'application-onboarding', 'release-gates', 'troubleshooting'];
-
-const REFERENCE_GROUPS = [
-  {
-    title: 'Assessment program inputs',
-    text:
-      'Code analysis, dependency inventory, infrastructure policy, container review, secrets governance, documentation ingestion, branch review, release gates, webhook delivery, API automation, audit events, notification routing, and reporting exports.',
-  },
-  {
-    title: 'Repository signals',
-    text:
-      'package.json, package-lock.json, yarn.lock, pnpm-lock.yaml, requirements.txt, pyproject.toml, setup.py, Pipfile, poetry.lock, Gemfile, Gemfile.lock, *.gemspec, composer.json, Cargo.toml, go.mod, pom.xml, build.gradle, Makefile, CMakeLists.txt, WORKSPACE, Dockerfile, docker-compose.yml, Chart.yaml, kustomization.yaml, Terraform modules, CloudFormation templates, SBOM documents, sbom.spdx.json, API schemas, README.md, docs/**/*.md, mkdocs.yml, conf.py, mint.json, docs.json, ownership metadata, .gitmodules, and .lfsconfig.',
-  },
-  {
-    title: 'Analyzer configuration',
-    text:
-      '.semgrep.yaml, codeql-config.yml, qlpack.yml, sonar-project.properties, .bandit, .brakeman.yml, .eslintrc.js, .rubocop.yml, .checkov.yml, .tfsec.yml, kics.config, Rego bundles, .syft.yaml, trivy.yaml, .grype.yaml, .hadolint.yaml, .safety-policy.yml, .gitleaks.toml, .trufflehog.yaml, and .secrets.baseline.',
-  },
-  {
-    title: 'Build and workflow systems',
-    text:
-      'npm, pnpm, Yarn, pip, Poetry, Pipenv, Bundler, RubyGems, Maven, Gradle, Cargo, Go modules, Composer, Make, CMake, webpack, Bazel, Docker, Kubernetes, Terraform, Helm, Kustomize, GitHub Actions, GitLab CI, Jenkins, CircleCI, Travis CI, Azure Pipelines, Bitbucket Pipelines, AWS CodeBuild, and Google Cloud Build.',
-  },
+const FEATURED_SLUGS = [
+  'project-discovery',
+  'supported-integrations',
+  'dependency-intelligence',
+  'ci-cd-integrations',
 ];
 
 function sectionId(title: string) {
@@ -1105,12 +1101,6 @@ function DocsIndex() {
               </a>
             ))}
           </nav>
-          <a
-            href="#repository-reference"
-            className="mt-4 inline-flex text-xs font-semibold text-cyan hover:underline"
-          >
-            Repository signals
-          </a>
         </aside>
 
         <div className="space-y-8">
@@ -1142,27 +1132,6 @@ function DocsIndex() {
             </section>
           ))}
 
-          <section id="repository-reference" className="scroll-mt-24 border-t border-edge pt-6">
-            <div className="mb-3">
-              <h2 className="text-xl font-black tracking-tight text-ink">
-                Repository assessment reference
-              </h2>
-              <p className="mt-1 text-sm leading-relaxed text-dim">
-                Crawler-readable reference material for repository manifests, analyzer
-                configuration, build systems, CI workflows, policy inputs, and security evidence.
-              </p>
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              {REFERENCE_GROUPS.map((group) => (
-                <section key={group.title} className="rounded-md border border-edge bg-panel p-4">
-                  <h3 className="text-sm font-bold text-ink">{group.title}</h3>
-                  <p className="mt-2 text-xs leading-relaxed text-dim">
-                    <InlineText text={group.text} />
-                  </p>
-                </section>
-              ))}
-            </div>
-          </section>
         </div>
       </div>
     </div>
