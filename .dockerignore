@@ -1,0 +1,43 @@
+# DVAP .dockerignore — applied when the worker build context is repo root (.)
+#
+# Keep the build context small so `docker build` for the worker is fast.
+# Individual service Dockerfiles with `context: ./api` etc. have their own
+# implicit context and are not affected by this file.
+
+# Version control
+.git/
+.gitignore
+
+# Python environments and caches
+**/__pycache__/
+**/*.py[cod]
+**/.venv/
+**/venv/
+**/env/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/*.egg-info/
+**/dist/
+**/build/
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+**/*.tsbuildinfo
+
+# Editor / OS
+.idea/
+.vscode/
+**/.DS_Store
+**/Thumbs.db
+
+# Local config / secrets
+.env
+*.env.local
+
+# CI
+.github/
+
+# Docs (large markdown not needed in images)
+docs/

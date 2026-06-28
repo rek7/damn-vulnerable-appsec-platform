@@ -1,0 +1,57 @@
+# DVAP .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg
+pip-wheel-metadata/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Node / frontend
+node_modules/
+dist/
+.next/
+.nuxt/
+*.tsbuildinfo
+
+# Docker
+*.dockerignore.local
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# Secrets (never commit real credentials)
+.env
+*.pem
+*.key
+seeds/canarytokens.local.env
+seeds/canarytokens.local.json
+db/init/*local*.sql
+!seeds/k8s-sa-token   # the fake token is intentionally committed
+
+# Test / coverage artifacts
+junit.xml
+test-results/

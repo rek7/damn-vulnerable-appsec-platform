@@ -1,0 +1,47 @@
+# DVAP — docker-compose.test.yml
+#
+# Overlay for e2e testing. Extends docker-compose.yml.
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-container-exit
+#
+# The e2e service starts the full DVAP stack, then runs the e2e harness at
+# e2e/test_e2e.py. Exit code of the e2e container determines CI pass/fail.
+
+services:
+  postgres:
+    ports: !reset []
+
+  frontend:
+    ports: !reset []
+
+  api:
+    ports: !reset []
+
+  listener:
+    ports: !reset []
+
+  e2e:
+    build:
+      context: .
+      dockerfile: e2e/Dockerfile
+    image: dvap-e2e:latest
+    environment:
+      DVAP_API_URL: http://api:8000
+      DVAP_LISTENER_URL: http://listener:9000
+      DVAP_DATABASE_URL: postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap
+    networks:
+      - dvap-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+      worker:
+        condition: service_healthy
+      listener:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    # Container exits with the pytest exit code; compose --abort-on-container-exit
+    # will then bring everything else down.
+    restart: "no"

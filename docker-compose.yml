@@ -1,0 +1,203 @@
+# DVAP Security Platform
+# docker-compose.yml
+#
+# CONTAINMENT POSTURE (CONTRACTS.md §13, SPEC.md §2):
+#   1. Synthetic seeds only — watermarked fake credentials (AKIA_FAKE_*, ghp_FAKE_*, etc.);
+#      worker refuses to boot if watermark check fails.
+#   2. No public-internet egress — all services communicate on an isolated bridge network.
+#      Published ports are bound to 127.0.0.1 only.
+#   3. Beacons stay internal — bundled payloads beacon only to the in-network listener;
+#      no evil-repos/ file may reference an external domain (a test enforces this).
+#   4. Link-local/metadata addresses blocked in code (worker rejects 169.254.0.0/16).
+#   5. SSRF guard on git URLs — allowlisted hosts only (github.com, gitlab.com,
+#      bitbucket.org, codeberg.org); private/loopback/link-local IPs rejected.
+#   6. Worker runs non-root with resource limits (cpu, memory, pids).
+#   7. Lateral-movement lab posture — app services intentionally share the
+#      internal Postgres network path and synthetic DB credentials.
+#
+# MAXIMUM ISOLATION (optional): set the dvap-net network to `internal: true` below.
+# This disables git-URL ingestion mode (no outbound DNS/TCP for git clone) but keeps
+# the sample-payload and archive-upload modes fully functional.
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # -------------------------------------------------------------------------
+  # postgres — application state and synthetic integration credentials
+  # -------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: dvap
+      POSTGRES_USER: dvap_app
+      POSTGRES_PASSWORD: FAKE_DVAP_DB_PASSWORD
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-54329}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - dvap-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dvap_app -d dvap"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging: *default-logging
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # frontend — React + TS + Vite served via nginx
+  # -------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+    image: dvap-frontend:latest
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-8080}:80"
+    networks:
+      - dvap-net
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    logging: *default-logging
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # api — FastAPI backend, Postgres-backed state, websocket hub
+  # -------------------------------------------------------------------------
+  api:
+    build:
+      context: ./api
+    image: dvap-api:latest
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    env_file:
+      - path: ./seeds/synthetic.env
+        required: true
+      - path: ./seeds/canarytokens.local.env
+        required: false
+    environment:
+      DVAP_WORKER_URL: http://worker:8100
+      DVAP_DATABASE_URL: ${DVAP_DATABASE_URL:-postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap}
+    networks:
+      - dvap-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      worker:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/healthz')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    logging: *default-logging
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # worker — vulnerable scan worker (executes analyzers)
+  # NOT published externally — internal-only on dvap-net.
+  # -------------------------------------------------------------------------
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    image: dvap-worker:latest
+    # No published port — only api reaches worker:8100 on the internal network
+    environment:
+      DVAP_SEEDS_FILE: /app/seeds/synthetic.env
+      DVAP_EXTRA_SEEDS_FILE: /app/seeds/canarytokens.local.env
+      DVAP_DATABASE_URL: ${DVAP_DATABASE_URL:-postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap}
+      LATERAL_MOVEMENT_DB_URL: ${LATERAL_MOVEMENT_DB_URL:-postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap}
+    env_file:
+      - path: ./seeds/synthetic.env
+        required: true
+      - path: ./seeds/canarytokens.local.env
+        required: false
+    volumes:
+      # Mount seeds read-only as a belt-and-suspenders measure;
+      # the worker Dockerfile also COPYs them so the image is self-contained.
+      - ./seeds:/app/seeds:ro
+    networks:
+      - dvap-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      listener:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8100/healthz')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    # --- Worker hardening (SPEC §2.7, CONTRACTS §2) ---
+    user: "10001:10001"         # non-root; MUST match uid of `dvap` user in worker/Dockerfile
+    read_only: false            # worker needs /tmp for ephemeral workdirs
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "${WORKER_CPUS:-1.0}"
+          memory: ${WORKER_MEMORY:-1G}
+          pids: ${WORKER_PIDS_LIMIT:-256}
+    logging: *default-logging
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # listener — OOB beacon receiver (HTTP)
+  # -------------------------------------------------------------------------
+  listener:
+    build:
+      context: ./listener
+    image: dvap-listener:latest
+    ports:
+      - "127.0.0.1:${LISTENER_PORT:-9000}:9000"
+    env_file:
+      - path: ./seeds/synthetic.env
+        required: true
+      - path: ./seeds/canarytokens.local.env
+        required: false
+    environment:
+      DVAP_API_URL: http://api:8000
+      DVAP_DATABASE_URL: ${DVAP_DATABASE_URL:-postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap}
+      LATERAL_MOVEMENT_DB_URL: ${LATERAL_MOVEMENT_DB_URL:-postgresql://dvap_app:FAKE_DVAP_DB_PASSWORD@postgres:5432/dvap}
+    networks:
+      - dvap-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/healthz')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    logging: *default-logging
+    restart: unless-stopped
+
+# ---------------------------------------------------------------------------
+# Network — isolated bridge; all services communicate here only.
+# To disable outbound git-URL fetch (maximum isolation), add: internal: true
+# ---------------------------------------------------------------------------
+networks:
+  dvap-net:
+    driver: bridge
+    # internal: true   # uncomment for maximum isolation (disables git-URL mode)
+
+volumes:
+  postgres-data:

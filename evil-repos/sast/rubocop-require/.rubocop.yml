@@ -1,0 +1,20 @@
+# DVAP payload: .rubocop.yml whose `require:` loads attacker Ruby at startup.
+#
+# Real behavior abused
+# --------------------
+# RuboCop's `require:` directive `require`s the named Ruby files when it boots --
+# it's meant for loading custom cops/extensions. RuboCop runs the require BEFORE
+# inspecting any code, so a repo that ships its own .rubocop.yml gets arbitrary
+# Ruby execution inside the linter the moment it is scanned with config
+# auto-discovery on (the default).
+#
+# Mitigation (disable_extensibility): the worker strips `require:` lines from
+# this file before running rubocop, so the malicious cop is never loaded.
+#
+# Containment: the required file (dvap_cop.rb) only beacons to the
+# __DVAP_LISTENER_HOST__ placeholder. No external host appears here.
+require:
+  - ./dvap_cop.rb
+
+AllCops:
+  NewCops: disable
