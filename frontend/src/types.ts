@@ -1,5 +1,5 @@
 // Wire types mirroring DVAP CONTRACTS.md §4, §6b, §11.
-// These MUST stay in sync with api/app/models.py.
+// These MUST match api/app/models.py.
 
 export type ModuleName = 'iac' | 'sca' | 'sast' | 'secrets';
 

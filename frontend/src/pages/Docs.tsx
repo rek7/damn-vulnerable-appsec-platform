@@ -1,4 +1,4 @@
-// Platform documentation for setup, operating model, and repository coverage.
+// Product documentation for setup, integrations, and security workflows.
 import { Link, Navigate, useParams } from 'react-router-dom';
 
 interface DocSection {
@@ -19,34 +19,34 @@ interface ReferenceDoc {
 const DOCS: ReferenceDoc[] = [
   {
     slug: 'quickstart',
-    category: 'Start here',
+    category: 'Get started',
     title: 'Quickstart',
     summary:
-      'Create a workspace, add an application, and run the first repository assessment with a standard policy profile.',
+      'Add an application, connect a repository, and review the first assessment result.',
     sections: [
       {
         title: 'Before you start',
         paragraphs: [
-          'A workspace groups applications, owners, policy defaults, and evidence retention rules. Most teams start with one workspace per business unit or delivery organization.',
-          'Each application record should have a repository URL, technical owner, business owner, service tier, and the assessment programs that apply to the project. You can add those details up front or let repository intake populate the first draft.',
+          'A workspace groups applications, teams, policy defaults, integrations, and evidence retention settings. Most teams start with one workspace for a business unit or delivery organization.',
+          'Before the first assessment, decide which repository and branch represent the application, who owns triage, and whether the service is production-facing, internal, or experimental.',
         ],
       },
       {
         title: 'Run the first assessment',
         paragraphs: [
-          'Open an application, choose a program, and start a repository assessment from a managed template, archive, or approved source URL. The platform records the analyzer summary, generated findings, and linked evidence activity under the same assessment record.',
-          'For a clean review workflow, assign the findings to the owning team before changing policy thresholds. That keeps the initial evidence separate from later triage decisions.',
+          'Open the application, select the repository source, choose the branch or uploaded archive, and run the assessment. The result includes analyzer output, normalized findings, evidence links, and audit events.',
+          'Review the first result before changing policy thresholds. That keeps onboarding evidence separate from later triage decisions and release-gate changes.',
         ],
         bullets: [
-          'Use a standard profile for the first run.',
-          'Confirm that owners and service tier are correct.',
-          'Review generated findings before adding exceptions.',
+          'Confirm the application owner, repository, and service tier.',
+          'Run the standard assessment profile.',
+          'Review initial findings before requesting exceptions or enabling release gates.',
         ],
       },
       {
         title: 'Where to go next',
         paragraphs: [
-          'After the first assessment completes, configure release gates, notification routing, and recurring scans. Teams that use pull request annotations usually configure branch review before scheduled assessment cadence.',
+          'After the first assessment completes, configure recurring assessments, notification routing, and release gates. Teams that use pull request checks usually configure branch review before scheduled assessment cadence.',
         ],
       },
     ],
@@ -54,22 +54,22 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'application-onboarding',
-    category: 'Start here',
+    category: 'Get started',
     title: 'Application onboarding',
     summary:
-      'Register applications with ownership, repository metadata, service tier, and the security programs that apply.',
+      'Register applications with ownership, repository metadata, service tier, and required security checks.',
     sections: [
       {
         title: 'Application records',
         paragraphs: [
-          'An application record is the durable unit used for policy, findings, reporting, and evidence. It can represent a service, library, worker, infrastructure repository, or deployable component.',
-          'Keep the record close to how teams ship software. If a monorepo owns several services, create separate application records when ownership, policy, or release gates differ.',
+          'An application record is the unit used for policy, findings, reporting, evidence, and release decisions. It can represent a service, library, worker, infrastructure repository, or deployable component.',
+          'Keep application records close to how teams ship software. In a monorepo, create separate records when ownership, policy, service tier, or release gates differ.',
         ],
       },
       {
         title: 'Required fields',
         paragraphs: [
-          'Repository URL, default branch, owner team, service tier, and data classification are the minimum fields needed for useful routing. Release cadence and deployment environment improve prioritization but can be added later.',
+          'Repository URL, default branch, owner team, service tier, and data classification are the minimum fields needed for routing and prioritization. Release cadence and deployment environment can be added after the first assessment.',
         ],
         bullets: [
           'Repository name and approved source URL.',
@@ -80,7 +80,7 @@ const DOCS: ReferenceDoc[] = [
       {
         title: 'Assessment scope',
         paragraphs: [
-          'Scope tells the platform which evidence to collect for an application. A web service may require code analysis, dependency review, image review, infrastructure policy, and secrets review, while a documentation repository may only need repository metadata and content indexing.',
+          'Scope defines which checks run for an application. A web service may require code analysis, dependency review, container review, infrastructure policy, and secrets review, while a documentation-only repository may only need ownership metadata, service catalog linkage, and freshness checks.',
         ],
       },
     ],
@@ -88,23 +88,23 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'repository-intake',
-    category: 'Start here',
+    category: 'Get started',
     title: 'Repository intake',
     summary:
-      'Define how repositories enter the platform, how ownership is assigned, and how assessment scope is recorded.',
+      'Import repository metadata, assign owners, and prepare the first application profile.',
     sections: [
       {
         title: 'Intake flow',
         paragraphs: [
-          'Repository intake normalizes source metadata before any assessment runs. The intake job reads branch defaults, repository topics, language mix, ownership files, and release metadata to create the first application profile.',
-          'Teams can accept the discovered profile as-is or override fields before the repository becomes eligible for scheduled scans and release gates.',
+          'Repository intake reads branch defaults, repository topics, language mix, ownership files, and release metadata before the first assessment runs.',
+          'Teams can accept the initial profile or override fields before the repository becomes eligible for scheduled assessments and release gates.',
         ],
       },
       {
-        title: 'Repository signals',
+        title: 'Source profile',
         paragraphs: [
-          'The intake job looks for common project files and configuration conventions. Examples include `package.json`, `requirements.txt`, `pyproject.toml`, `Gemfile`, `*.gemspec`, `go.mod`, `pom.xml`, `build.gradle`, `Dockerfile`, `Chart.yaml`, and workflow definitions under `.github/workflows/`.',
-          'These files do not decide policy on their own. They help the platform choose the right assessment program and route findings to the people who can act on them.',
+          'The source profile stores the repository files and conventions that affect analysis. Common examples include `package.json`, `requirements.txt`, `pyproject.toml`, `Gemfile`, `go.mod`, `pom.xml`, `build.gradle`, `Dockerfile`, `Chart.yaml`, and workflow definitions under `.github/workflows/`.',
+          'Profile data stays with the application record so owners can review why dependency, code, container, or infrastructure checks were selected.',
         ],
       },
       {
@@ -118,23 +118,23 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'project-discovery',
-    category: 'Start here',
+    category: 'Get started',
     title: 'Project discovery',
     summary:
-      'Use repository structure, manifests, lockfiles, and service metadata to infer which assessment programs apply.',
+      'Classify repository structure, manifests, lockfiles, and service metadata before assessment.',
     sections: [
       {
-        title: 'Detection model',
+        title: 'Classification model',
         paragraphs: [
-          'Project discovery is intentionally conservative. The platform prefers durable repository evidence over naming conventions, so it looks for manifests, build descriptors, policy directories, container build context, API schemas, and documentation roots.',
-          'When multiple ecosystems are present, discovery records all candidates and lets policy decide whether each program is required, optional, or informational.',
+          'The platform builds the application profile from repository metadata, file inventory, ownership records, build descriptors, policy directories, container build context, API schemas, and documentation roots.',
+          'When multiple ecosystems are present, the profile keeps each analysis type separate so policy can decide whether it is required, optional, or informational for that application.',
         ],
       },
       {
-        title: 'Signals that imply coverage',
+        title: 'Language and build inventory',
         paragraphs: [
-          'A repository does not need to name every tool it uses for the platform to build an assessment profile. Files such as `package.json`, `pnpm-lock.yaml`, `pyproject.toml`, `Pipfile`, `Gemfile`, `*.gemspec`, `go.mod`, `pom.xml`, `build.gradle`, `Cargo.toml`, and `composer.json` are enough to infer package inventory requirements.',
-          'Infrastructure and delivery signals work the same way. `Dockerfile`, `docker-compose.yml`, `Chart.yaml`, `kustomization.yaml`, `main.tf`, `template.yaml`, `buildspec.yml`, `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, and `.circleci/config.yml` tell the platform which review programs are likely relevant before a team configures named integrations.',
+          'During import, the platform records language and build inventory from files such as `package.json`, `pnpm-lock.yaml`, `pyproject.toml`, `Pipfile`, `Gemfile`, `*.gemspec`, `go.mod`, `pom.xml`, `build.gradle`, `Cargo.toml`, and `composer.json`.',
+          'Deployment and automation context is recorded from files such as `Dockerfile`, `docker-compose.yml`, `Chart.yaml`, `kustomization.yaml`, `main.tf`, `template.yaml`, `buildspec.yml`, `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, and `.circleci/config.yml`.',
         ],
       },
       {
@@ -146,7 +146,7 @@ const DOCS: ReferenceDoc[] = [
       {
         title: 'Manual overrides',
         paragraphs: [
-          'Workspace owners can add or remove programs when discovery does not have enough context. The override is recorded with a reason, reviewer, and expiration date so future imports can be compared against the decision.',
+          'Workspace owners can add or remove analysis types when discovery does not have enough context. The override is recorded with a reason, reviewer, and expiration date so future imports can be compared against the decision.',
         ],
       },
     ],
@@ -154,7 +154,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'repository-management',
-    category: 'Start here',
+    category: 'Get started',
     title: 'Repository management',
     summary:
       'Maintain source metadata, ownership files, branch rules, and recurring assessment schedules.',
@@ -183,36 +183,36 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'supported-integrations',
-    category: 'Programs',
+    category: 'Security programs',
     title: 'Integration catalog',
     summary:
-      'Review supported scanners, package managers, build systems, infrastructure formats, and delivery integrations.',
+      'Review supported scanner, dependency, build, infrastructure, and delivery integrations.',
     sections: [
       {
         title: 'Code and scanner integrations',
         paragraphs: [
-          'Code review and scanner coverage includes Semgrep, CodeQL, SonarQube, Bandit, Brakeman, ESLint, RuboCop, Checkov, tfsec, KICS, OPA, Conftest, Trivy, Grype, Hadolint, Gitleaks, TruffleHog, detect-secrets, Safety, Syft, and SPDX SBOM inputs.',
-          'Integrations can be configured directly or discovered from repository configuration. The assessment record keeps the original tool name, normalized finding category, evidence path, owner, severity, and review state together.',
+          'The platform can ingest results from common SAST, IaC, container, SBOM, and secrets tools. Supported inputs include Semgrep, CodeQL, SonarQube, Bandit, Brakeman, ESLint, RuboCop, Checkov, tfsec, KICS, OPA, Conftest, Trivy, Grype, Hadolint, Gitleaks, TruffleHog, detect-secrets, Safety, Syft, and SPDX SBOM files.',
+          'Assessment records keep the source tool name, normalized finding category, evidence path, owner, severity, and review state together.',
         ],
       },
       {
         title: 'Package and build ecosystems',
         paragraphs: [
-          'Dependency and build coverage includes npm, pnpm, Yarn, pip, Poetry, Pipenv, Bundler, RubyGems, Composer, Cargo, Go modules, Maven, Gradle, Make, CMake, Bazel, webpack, and Docker build context.',
-          'The platform uses manifests and lockfiles to decide which inventory jobs should run, then links each finding back to the source file that introduced the package or build behavior.',
+          'Dependency inventory supports common package and build ecosystems including npm, pnpm, Yarn, pip, Poetry, Pipenv, Bundler, RubyGems, Composer, Cargo, Go modules, Maven, Gradle, Make, CMake, Bazel, webpack, and Docker build context.',
+          'The platform uses manifests and lockfiles to select inventory jobs, then links each finding back to the source file that introduced the package or build behavior.',
         ],
       },
       {
         title: 'Delivery and infrastructure systems',
         paragraphs: [
-          'Delivery and infrastructure coverage includes Kubernetes, Terraform, Helm, Kustomize, CloudFormation, Ansible, Packer, GitHub Actions, GitLab CI, Jenkins, CircleCI, Travis CI, Azure Pipelines, Bitbucket Pipelines, AWS CodeBuild, and Google Cloud Build.',
-          'These integrations are treated as evidence sources, not separate application records. Their findings remain attached to the owning application so release gates, exceptions, and reporting stay consistent.',
+          'Infrastructure and delivery integrations include Kubernetes, Terraform, Helm, Kustomize, CloudFormation, Ansible, Packer, GitHub Actions, GitLab CI, Jenkins, CircleCI, Travis CI, Azure Pipelines, Bitbucket Pipelines, AWS CodeBuild, and Google Cloud Build.',
+          'Integration output is attached to the owning application so release gates, exceptions, and reporting stay consistent.',
         ],
       },
       {
         title: 'Reporting expectations',
         paragraphs: [
-          'Program coverage reports answer whether required evidence exists, whether findings are open, and whether exceptions have valid owners and expiration dates. They should not be treated as a replacement for application ownership review.',
+          'Integration reports show whether required evidence arrived, whether findings remain open, and whether exceptions have valid owners and expiration dates.',
         ],
       },
     ],
@@ -220,7 +220,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'code-analysis',
-    category: 'Programs',
+    category: 'Security programs',
     title: 'Code analysis',
     summary:
       'Review language-aware analyzer output, project-level rule configuration, and developer handoff notes.',
@@ -229,7 +229,7 @@ const DOCS: ReferenceDoc[] = [
         title: 'How code analysis works',
         paragraphs: [
           'Code analysis collects source findings from analyzer output and project-level rule configuration. The platform keeps raw evidence attached to the assessment while presenting a normalized view for triage.',
-          'Configuration files such as `.semgrep.yaml`, `codeql-config.yml`, `qlpack.yml`, `sonar-project.properties`, `.bandit`, `.brakeman.yml`, `.eslintrc.js`, and `.rubocop.yml` are treated as repository signals. They help identify custom rules, disabled checks, and project-specific review behavior.',
+          'Configuration files such as `.semgrep.yaml`, `codeql-config.yml`, `qlpack.yml`, `sonar-project.properties`, `.bandit`, `.brakeman.yml`, `.eslintrc.js`, and `.rubocop.yml` help identify custom rules, disabled checks, and project-specific review behavior.',
         ],
       },
       {
@@ -249,7 +249,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'dependency-intelligence',
-    category: 'Programs',
+    category: 'Security programs',
     title: 'Dependency intelligence',
     summary:
       'Build an inventory from manifests, lockfiles, package metadata, and advisory correlation.',
@@ -278,7 +278,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'infrastructure-policy',
-    category: 'Programs',
+    category: 'Security programs',
     title: 'Infrastructure policy',
     summary:
       'Evaluate cloud templates, deployment overlays, modules, and policy bundles before release.',
@@ -286,7 +286,7 @@ const DOCS: ReferenceDoc[] = [
       {
         title: 'Policy inputs',
         paragraphs: [
-          'Infrastructure policy reviews repository files that describe deployment state. Typical inputs include Terraform modules, OpenTofu projects, provider metadata, Helm charts, Kustomize overlays, CloudFormation templates, Ansible inventories, Packer templates, and policy directories that contain Rego bundles.',
+          'Infrastructure policy reviews repository files that describe deployment state. Typical inputs include Terraform modules, OpenTofu projects, provider metadata, Helm charts, Kustomize overlays, CloudFormation templates, Ansible inventories, Packer templates, and policy directories used by OPA or Conftest.',
           'Project configuration such as `.checkov.yml`, `.tfsec.yml`, `kics.config`, and custom policy directories helps the platform explain which policy packs were loaded for a run.',
         ],
       },
@@ -307,28 +307,28 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'secrets-governance',
-    category: 'Programs',
+    category: 'Security programs',
     title: 'Secrets governance',
     summary:
-      'Track credential-like findings, owner routing, remediation evidence, and recurring patterns.',
+      'Track suspected secret findings, owner routing, remediation evidence, and recurring patterns.',
     sections: [
       {
         title: 'Review scope',
         paragraphs: [
-          'Secrets governance focuses on detection coverage, ownership, and remediation evidence for credential-like material. The platform does not decide rotation policy by itself; it records evidence so owners can decide whether rotation, revocation, or dismissal is appropriate.',
-          'Repository details such as `.gitleaks.toml`, `.trufflehog.yaml`, `.secrets.baseline`, `.gitignore`, allowlist configuration, generated files, archive contents, and environment templates help explain how a finding was produced.',
+          'Secrets governance focuses on detection quality, ownership, and remediation evidence for suspected secrets. The platform does not decide rotation policy by itself; it records evidence so owners can decide whether rotation, revocation, or dismissal is appropriate.',
+          'Repository details such as `.gitleaks.toml`, `.trufflehog.yaml`, `.secrets.baseline`, `.gitignore`, allowlist configuration, ignored paths, packaged artifacts, and environment templates help explain how a finding was produced.',
         ],
       },
       {
         title: 'Remediation evidence',
         paragraphs: [
-          'Evidence should include the affected location, credential family, owner response, and the remediation action taken. If the value is not confirmed, record the review note and keep sensitive-looking content masked in the operator view.',
+          'Evidence should include the affected location, credential family, owner response, and the remediation action taken. Keep raw values redacted in the UI, tickets, exports, and webhook bodies unless workspace policy explicitly allows disclosure.',
         ],
       },
       {
         title: 'Trend analysis',
         paragraphs: [
-          'Recurring patterns are often more useful than one-off findings. Use reporting to identify teams, file paths, templates, or workflows that repeatedly produce credential-like material.',
+          'Recurring patterns are often more useful than one-off findings. Use reporting to identify teams, file paths, templates, or workflows that repeatedly produce suspected secrets.',
         ],
       },
     ],
@@ -336,15 +336,15 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'container-review',
-    category: 'Programs',
+    category: 'Security programs',
     title: 'Container and image review',
     summary:
-      'Connect Dockerfiles, image metadata, generated inventories, and registry context to application findings.',
+      'Connect Dockerfiles, SBOMs, image metadata, registry data, and base image status to application findings.',
     sections: [
       {
         title: 'Repository inputs',
         paragraphs: [
-          'Container review uses repository build context and generated image metadata. Common inputs include `Dockerfile`, `docker-compose.yml`, `.dockerignore`, image labels, registry configuration, build arguments, package databases, and SBOM exports such as SPDX documents.',
+          'Container review uses repository build context and image metadata. Common inputs include `Dockerfile`, `docker-compose.yml`, `.dockerignore`, image labels, registry configuration, build arguments, package databases, and SBOM exports such as SPDX and CycloneDX documents.',
           'Files like `.syft.yaml`, `trivy.yaml`, `.grype.yaml`, and `.hadolint.yaml` may appear when teams customize image inventory, package review, or Dockerfile policy behavior.',
         ],
       },
@@ -364,16 +364,16 @@ const DOCS: ReferenceDoc[] = [
     related: ['dependency-intelligence', 'release-gates', 'asset-inventory'],
   },
   {
-    slug: 'documentation-ingestion',
-    category: 'Programs',
-    title: 'Documentation ingestion',
+    slug: 'documentation-sources',
+    category: 'Security programs',
+    title: 'Documentation sources',
     summary:
-      'Index service docs, runbooks, API references, and remediation guidance alongside application findings.',
+      'Connect service documentation, runbooks, API references, and remediation guidance to application findings.',
     sections: [
       {
-        title: 'Supported content',
+        title: 'Supported sources',
         paragraphs: [
-          'Documentation ingestion collects service metadata, remediation guides, runbooks, API references, and ownership notes from the repository. Common inputs include `README.md`, `docs/**/*.md`, `mkdocs.yml`, `conf.py`, `mint.json`, `docs.json`, API reference schemas, diagrams, frontmatter, and embedded image references.',
+          'Documentation sources collect service metadata, remediation guides, runbooks, API references, and ownership notes from the repository. Common inputs include `README.md`, markdown documentation, API reference schemas, diagrams, and service catalog links.',
           'The goal is to make findings easier to act on. The platform links a finding to relevant service docs rather than forcing reviewers to leave the application record and search manually.',
         ],
       },
@@ -386,7 +386,7 @@ const DOCS: ReferenceDoc[] = [
       {
         title: 'API references',
         paragraphs: [
-          'API schemas and generated references are useful for ownership and data classification. Treat them as application metadata unless a policy specifically requires deeper review.',
+          'API schemas and reference files are useful for ownership and data classification. Treat them as application metadata unless a policy specifically requires deeper review.',
         ],
       },
     ],
@@ -394,7 +394,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'ci-cd-integrations',
-    category: 'Automation',
+    category: 'Integrations and automation',
     title: 'CI/CD integrations',
     summary:
       'Connect assessments to build workflows, branch rules, artifact promotion, and developer feedback loops.',
@@ -402,8 +402,8 @@ const DOCS: ReferenceDoc[] = [
       {
         title: 'Workflow discovery',
         paragraphs: [
-          'Automation discovery looks for workflow files and build metadata such as `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `.circleci/config.yml`, `.travis.yml`, `azure-pipelines.yml`, `bitbucket-pipelines.yml`, `buildspec.yml`, and `cloudbuild.yaml`.',
-          'These files tell the platform where assessments can run and where results should be posted. They do not automatically enforce policy until a release gate or branch rule is configured.',
+          'Connect CI/CD systems to run assessments, publish status checks, and enforce release gates. Repository intake can suggest workflows from common CI configuration files such as `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `.circleci/config.yml`, `azure-pipelines.yml`, and `buildspec.yml`.',
+          'Workflow metadata helps the platform determine where assessments can run and where results should be posted. It does not enforce policy until a release gate or branch rule is configured.',
         ],
       },
       {
@@ -423,7 +423,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'branch-and-pr-review',
-    category: 'Automation',
+    category: 'Integrations and automation',
     title: 'Branch and pull request review',
     summary:
       'Send concise assessment status into pull requests while preserving detailed evidence in the platform.',
@@ -451,7 +451,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'release-gates',
-    category: 'Automation',
+    category: 'Integrations and automation',
     title: 'Release gates',
     summary:
       'Apply policy decisions before promotion while keeping exceptions and evidence reviewable.',
@@ -479,10 +479,10 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'api-reference',
-    category: 'Automation',
+    category: 'Integrations and automation',
     title: 'API reference',
     summary:
-      'Use the platform API to create scans, fetch findings, inspect evidence, and manage workspace configuration.',
+      'Use the platform API to create assessments, fetch findings, inspect evidence, and manage workspace configuration.',
     sections: [
       {
         title: 'Authentication',
@@ -507,7 +507,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'webhooks',
-    category: 'Automation',
+    category: 'Integrations and automation',
     title: 'Webhooks',
     summary:
       'Subscribe external systems to assessment, finding, exception, and integration-health events.',
@@ -525,9 +525,9 @@ const DOCS: ReferenceDoc[] = [
         ],
       },
       {
-        title: 'Payload design',
+        title: 'Body format',
         paragraphs: [
-          'Webhook bodies include enough metadata to fetch the full resource from the API. They should not include sensitive evidence blobs or masked values that belong in the platform UI.',
+          'Webhook bodies include enough metadata to fetch the full resource from the API. They should not include sensitive evidence blobs or masked values that should stay in the UI.',
         ],
       },
     ],
@@ -535,7 +535,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'policy-management',
-    category: 'Operations',
+    category: 'Triage and remediation',
     title: 'Policy management',
     summary: 'Centralize requirements, exception rules, escalation paths, and approval evidence.',
     sections: [
@@ -563,7 +563,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'finding-lifecycle',
-    category: 'Operations',
+    category: 'Triage and remediation',
     title: 'Finding lifecycle',
     summary:
       'Move issues from detection to triage, ownership, remediation, exception, and closure.',
@@ -591,7 +591,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'developer-workflows',
-    category: 'Operations',
+    category: 'Triage and remediation',
     title: 'Developer workflows',
     summary:
       'Make findings actionable inside pull requests, tickets, documentation, and team dashboards.',
@@ -605,7 +605,7 @@ const DOCS: ReferenceDoc[] = [
       {
         title: 'Ticket handoff',
         paragraphs: [
-          'A ticket should include the finding title, affected location, owner, severity, due date, remediation summary, and a link back to the platform evidence. Avoid duplicating sensitive data in external systems.',
+          'A ticket should include the finding title, affected location, owner, severity, due date, remediation summary, and a link back to the evidence record. Avoid duplicating sensitive data in external systems.',
         ],
       },
       {
@@ -615,11 +615,11 @@ const DOCS: ReferenceDoc[] = [
         ],
       },
     ],
-    related: ['branch-and-pr-review', 'documentation-ingestion', 'finding-lifecycle'],
+    related: ['branch-and-pr-review', 'documentation-sources', 'finding-lifecycle'],
   },
   {
     slug: 'exceptions-and-risk',
-    category: 'Operations',
+    category: 'Triage and remediation',
     title: 'Exceptions and risk acceptance',
     summary: 'Record temporary risk decisions with ownership, scope, expiration, and evidence.',
     sections: [
@@ -646,7 +646,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'triage-operations',
-    category: 'Operations',
+    category: 'Triage and remediation',
     title: 'Triage operations',
     summary: 'Review new findings, assign owners, resolve duplicates, and document decisions.',
     sections: [
@@ -673,7 +673,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'asset-inventory',
-    category: 'Administration',
+    category: 'Administration and governance',
     title: 'Asset inventory',
     summary:
       'Join repositories, services, owners, deployment metadata, and assessment coverage in one application view.',
@@ -701,7 +701,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'data-handling',
-    category: 'Administration',
+    category: 'Administration and governance',
     title: 'Data handling',
     summary:
       'Define how assessment evidence, repository metadata, audit events, and exports are retained.',
@@ -709,7 +709,7 @@ const DOCS: ReferenceDoc[] = [
       {
         title: 'Evidence boundaries',
         paragraphs: [
-          'Assessment evidence may include file paths, analyzer summaries, masked data markers, package names, image metadata, and policy decisions. Sensitive-looking values should stay masked in the operator view and should not be copied into tickets or webhook bodies.',
+          'Assessment evidence may include file paths, analyzer summaries, package names, image metadata, redacted secret indicators, and policy decisions. Sensitive values should remain redacted in UI, exports, tickets, and webhooks unless workspace policy explicitly allows disclosure.',
         ],
       },
       {
@@ -729,7 +729,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'access-governance',
-    category: 'Administration',
+    category: 'Administration and governance',
     title: 'Access governance',
     summary:
       'Manage workspace roles, approval groups, evidence visibility, and periodic access reviews.',
@@ -757,7 +757,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'reporting-analytics',
-    category: 'Administration',
+    category: 'Administration and governance',
     title: 'Reporting and analytics',
     summary:
       'Compare coverage, trends, SLA performance, and remediation outcomes across applications.',
@@ -785,7 +785,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'workspace-configuration',
-    category: 'Administration',
+    category: 'Administration and governance',
     title: 'Workspace configuration',
     summary:
       'Set defaults for applications, teams, integrations, policy scope, and notification routing.',
@@ -813,7 +813,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'integration-health',
-    category: 'Administration',
+    category: 'Administration and governance',
     title: 'Integration health',
     summary:
       'Track scan freshness, connector status, ingestion errors, stale credentials, and queue latency.',
@@ -841,7 +841,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'audit-log',
-    category: 'Administration',
+    category: 'Administration and governance',
     title: 'Audit log',
     summary:
       'Review administrative changes, policy decisions, exception approvals, exports, and integration events.',
@@ -869,7 +869,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'notifications',
-    category: 'Administration',
+    category: 'Administration and governance',
     title: 'Notifications',
     summary:
       'Route assessment results, overdue work, exception events, and integration-health changes to the right teams.',
@@ -897,7 +897,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'data-export',
-    category: 'Administration',
+    category: 'Administration and governance',
     title: 'Data export',
     summary:
       'Export findings, evidence summaries, application inventory, and reporting datasets for review.',
@@ -925,7 +925,7 @@ const DOCS: ReferenceDoc[] = [
   },
   {
     slug: 'troubleshooting',
-    category: 'Administration',
+    category: 'Administration and governance',
     title: 'Troubleshooting',
     summary:
       'Diagnose missing findings, stale evidence, integration errors, and unexpected policy decisions.',
@@ -939,7 +939,7 @@ const DOCS: ReferenceDoc[] = [
       {
         title: 'Unexpected findings',
         paragraphs: [
-          'Open the assessment detail page and compare repository inputs, analyzer summary, policy version, and correlated evidence. If the repository changed between runs, compare the commit SHA and source archive.',
+          'Open the assessment detail page and compare repository inputs, analyzer summary, policy version, and correlated evidence. If the repository changed between runs, compare the commit SHA, branch or tag, analyzer configuration, and assessment inputs.',
         ],
       },
       {
@@ -959,8 +959,8 @@ const DOC_MAP: Record<string, ReferenceDoc> = Object.fromEntries(
 
 const DOC_GROUPS = [
   {
-    title: 'Start here',
-    description: 'Set up the workspace, register applications, and discover repository shape.',
+    title: 'Get started',
+    description: 'Connect repositories, set ownership, and prepare applications for assessment.',
     slugs: [
       'quickstart',
       'application-onboarding',
@@ -970,8 +970,8 @@ const DOC_GROUPS = [
     ],
   },
   {
-    title: 'Programs',
-    description: 'Understand the assessment programs and the evidence they collect.',
+    title: 'Security programs',
+    description: 'Configure code, dependency, infrastructure, container, and secrets checks.',
     slugs: [
       'supported-integrations',
       'code-analysis',
@@ -979,12 +979,12 @@ const DOC_GROUPS = [
       'infrastructure-policy',
       'secrets-governance',
       'container-review',
-      'documentation-ingestion',
+      'documentation-sources',
     ],
   },
   {
-    title: 'Automation',
-    description: 'Connect assessment results to build workflows, release gates, and APIs.',
+    title: 'Integrations and automation',
+    description: 'Connect CI/CD, APIs, webhooks, and release controls.',
     slugs: [
       'ci-cd-integrations',
       'branch-and-pr-review',
@@ -994,8 +994,8 @@ const DOC_GROUPS = [
     ],
   },
   {
-    title: 'Operations',
-    description: 'Manage findings, exceptions, triage, and developer handoff.',
+    title: 'Triage and remediation',
+    description: 'Route findings, manage exceptions, and track remediation work.',
     slugs: [
       'policy-management',
       'finding-lifecycle',
@@ -1005,8 +1005,8 @@ const DOC_GROUPS = [
     ],
   },
   {
-    title: 'Administration',
-    description: 'Configure inventory, access, reporting, notifications, and audit workflows.',
+    title: 'Administration and governance',
+    description: 'Manage inventory, data handling, access, reporting, and workspace settings.',
     slugs: [
       'asset-inventory',
       'data-handling',
@@ -1064,32 +1064,41 @@ function DocsIndex() {
     <div className="space-y-6">
       <section className="border-b border-edge pb-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-cyan">Documentation</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight text-ink">DVAP platform docs</h1>
+        <h1 className="mt-2 text-3xl font-black tracking-tight text-ink">
+          Security platform documentation
+        </h1>
         <p className="mt-3 max-w-4xl text-sm leading-relaxed text-dim">
-          Guides and reference material for onboarding applications, running repository assessments,
-          reviewing findings, and operating an application security program.
+          Guides and reference material for onboarding applications, running assessments, triaging
+          findings, and managing application security operations.
         </p>
       </section>
 
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {featured.map((doc) => (
-          <Link
-            key={doc.slug}
-            to={`/docs/${doc.slug}`}
-            className="rounded-md border border-edge bg-panel p-4 transition-colors hover:border-cyan"
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-cyan">
-              {doc.category}
-            </p>
-            <h2 className="mt-2 text-sm font-bold text-ink">{doc.title}</h2>
-            <p className="mt-2 text-xs leading-relaxed text-dim">{doc.summary}</p>
-          </Link>
-        ))}
+      <section>
+        <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-dim">
+          Recommended documentation
+        </h2>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {featured.map((doc) => (
+            <Link
+              key={doc.slug}
+              to={`/docs/${doc.slug}`}
+              className="rounded-md border border-edge bg-panel p-4 transition-colors hover:border-cyan"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-cyan">
+                {doc.category}
+              </p>
+              <h2 className="mt-2 text-sm font-bold text-ink">{doc.title}</h2>
+              <p className="mt-2 text-xs leading-relaxed text-dim">{doc.summary}</p>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
         <aside className="panel h-max p-4 lg:sticky lg:top-20">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-dim">Browse by area</h2>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-dim">
+            Documentation topics
+          </h2>
           <nav className="mt-3 space-y-1">
             {DOC_GROUPS.map((group) => (
               <a
@@ -1120,10 +1129,7 @@ function DocsIndex() {
                       to={`/docs/${slug}`}
                       className="rounded-md border border-edge bg-panel p-4 transition-colors hover:border-cyan"
                     >
-                      <p className="text-xs font-semibold uppercase tracking-wide text-dim">
-                        {doc.category}
-                      </p>
-                      <h3 className="mt-2 text-sm font-bold text-ink">{doc.title}</h3>
+                      <h3 className="text-sm font-bold text-ink">{doc.title}</h3>
                       <p className="mt-2 text-xs leading-relaxed text-dim">{doc.summary}</p>
                     </Link>
                   );
@@ -1131,7 +1137,6 @@ function DocsIndex() {
               </div>
             </section>
           ))}
-
         </div>
       </div>
     </div>
@@ -1143,7 +1148,7 @@ function DocsArticle({ doc }: { doc: ReferenceDoc }) {
     <div className="grid gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
       <aside className="space-y-4 lg:sticky lg:top-20 lg:h-max">
         <Link to="/docs" className="btn w-full justify-start">
-          &lt;- Back to docs
+          Back to documentation
         </Link>
         <div className="panel p-4">
           <h2 className="text-xs font-bold uppercase tracking-widest text-dim">On this page</h2>
@@ -1168,7 +1173,7 @@ function DocsArticle({ doc }: { doc: ReferenceDoc }) {
             aria-label="Breadcrumb"
           >
             <Link to="/docs" className="font-semibold text-cyan hover:underline">
-              Docs
+              Documentation
             </Link>
             <span>/</span>
             <span>{doc.category}</span>
@@ -1202,7 +1207,9 @@ function DocsArticle({ doc }: { doc: ReferenceDoc }) {
         </div>
 
         <footer className="border-t border-edge pt-5">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-dim">Related pages</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-dim">
+            Related documentation
+          </h2>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             {doc.related.map((slug) => {
               const related = DOC_MAP[slug];

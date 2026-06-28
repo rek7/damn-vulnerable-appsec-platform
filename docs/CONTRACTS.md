@@ -9,7 +9,7 @@ This document describes the product-level contracts between DVAP services. It is
 | `api` | Owns scan records, workspace configuration, finding inputs, and activity updates |
 | `worker` | Fetches repositories, runs analyzer integrations, and returns assessment results |
 | `listener` | Receives local assessment activity and forwards it to the API |
-| `frontend` | Presents the operator dashboard, findings, assessments, security activity, and docs |
+| `frontend` | Presents the dashboard, findings, assessments, security activity, and documentation |
 
 ## Scan Lifecycle
 
@@ -17,8 +17,8 @@ This document describes the product-level contracts between DVAP services. It is
 2. The API creates an assessment record with the current workspace profile.
 3. The worker prepares a temporary work directory for the selected source.
 4. Analyzer integrations run and return structured status, summary, and step-log entries.
-5. The API stores the completed scan and publishes assessment updates to operator views.
-6. Related security signals are linked to the assessment record for operator review.
+5. The API stores the completed scan and publishes assessment updates to application views.
+6. Related security signals are linked to the assessment record for review.
 
 ## Source Types
 
@@ -68,7 +68,7 @@ Archive uploads should enforce size, file-type, and path-boundary checks. Git UR
 - `path`
 - `remote`
 
-Sensitive-looking values should be masked in the operator UI.
+Sensitive-looking values should be redacted in the UI.
 
 ## Frontend Contracts
 
@@ -77,7 +77,7 @@ Sensitive-looking values should be masked in the operator UI.
 - Assessment detail renders analyzer status, step logs, findings, and correlated evidence.
 - Finding cards use product-facing assessment labels rather than backend identifiers.
 - Documentation routes are available at `/docs` and `/docs/:docId`.
-- Documentation includes repository discovery guidance for inferred coverage and an integration catalog for explicit scanner, build, package, infrastructure, and delivery integrations.
+- Documentation includes repository discovery guidance and an integration catalog for scanner, build, package, infrastructure, and delivery systems.
 
 ## Test Expectations
 

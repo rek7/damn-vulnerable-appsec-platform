@@ -1,5 +1,5 @@
-// Renders normalized signal details. Values that look sensitive are masked for
-// the operator view.
+// Renders normalized signal details. Values that look sensitive are redacted for
+// the UI.
 interface Props {
   decoded: string;
 }

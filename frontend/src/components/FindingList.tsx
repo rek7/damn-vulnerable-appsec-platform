@@ -13,7 +13,7 @@ export function FindingList({ findings, compact = false }: Props) {
   if (findings.length === 0) {
     return (
       <p className="rounded border border-edge bg-panel2 px-3 py-2 text-sm text-dim">
-        No application security findings have been generated yet.
+        No application security findings have been reported yet.
       </p>
     );
   }

@@ -118,7 +118,7 @@ export function ScanDetail() {
           <h2 className="text-sm font-bold uppercase tracking-widest text-dim">
             Application security findings
           </h2>
-          <span className="font-mono text-xs text-dim">{findings.length} generated</span>
+          <span className="font-mono text-xs text-dim">{findings.length} reported</span>
         </div>
         <FindingList findings={findings} />
       </section>
@@ -150,7 +150,7 @@ export function ScanDetail() {
             </li>
             <li className="rounded border border-edge bg-panel2 px-3 py-2">
               <span className="block uppercase tracking-wide text-dim">Sensitive values</span>
-              <span className="mt-1 block font-semibold text-ink">Masked in operator view</span>
+              <span className="mt-1 block font-semibold text-ink">Redacted in application views</span>
             </li>
           </ul>
         </section>
@@ -166,7 +166,7 @@ export function ScanDetail() {
           Evidence events ({timeline.length})
         </h2>
         <p className="mb-3 text-xs text-dim">
-          Activity details are shown below. Sensitive-looking values are masked for operator review.
+          Activity details are shown below. Sensitive-looking values are redacted for review.
         </p>
         {timeline.length === 0 ? (
           <p className="text-sm italic text-dim" data-testid="no-signals">

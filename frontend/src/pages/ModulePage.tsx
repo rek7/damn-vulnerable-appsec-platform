@@ -282,7 +282,7 @@ export function ModulePage() {
 
             <div>
               <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-dim">
-                Findings generated
+                Findings reported
               </h3>
               <FindingList findings={inlineFindings} compact />
             </div>

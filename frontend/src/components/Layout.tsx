@@ -5,8 +5,8 @@ const NAV = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/findings', label: 'Findings', end: false },
   { to: '/scans', label: 'Assessments', end: false },
-  { to: '/live', label: 'Events', end: false },
-  { to: '/docs', label: 'Docs', end: false },
+  { to: '/live', label: 'Activity', end: false },
+  { to: '/docs', label: 'Documentation', end: false },
 ];
 
 export function Layout() {
@@ -19,8 +19,8 @@ export function Layout() {
               D
             </span>
             <span className="min-w-0">
-              <span className="block text-sm font-bold tracking-tight">DVAP AppSec</span>
-              <span className="block text-xs text-white/60">Application security platform</span>
+              <span className="block text-sm font-bold tracking-tight">DVAP</span>
+              <span className="block text-xs text-white/60">Application security management</span>
             </span>
           </NavLink>
           <nav className="flex flex-wrap gap-1 px-3 pb-3 lg:flex-col lg:gap-1">
@@ -37,8 +37,8 @@ export function Layout() {
           </nav>
           <div className="mt-auto hidden border-t border-white/10 p-4 lg:block">
             <p className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs leading-relaxed text-white/70">
-              Default workspace profile: standard review. Repository assessment inputs are processed
-              so findings and evidence are visible.
+              Workspace policy: Standard. Assessments preserve findings, evidence, and review
+              history.
             </p>
           </div>
         </div>
@@ -49,10 +49,10 @@ export function Layout() {
           <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-3 lg:px-8">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-dim">
-                Application security workspace
+                Security operations workspace
               </p>
               <p className="text-sm font-semibold text-ink">
-                Assessment programs, policy decisions, findings, and evidence
+                Assessments, findings, policy decisions, and evidence
               </p>
             </div>
             <div className="flex items-center gap-3">
