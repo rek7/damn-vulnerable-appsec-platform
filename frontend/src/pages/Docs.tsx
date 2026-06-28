@@ -1010,6 +1010,29 @@ const DOC_GROUPS = [
 
 const FEATURED_SLUGS = ['quickstart', 'application-onboarding', 'release-gates', 'troubleshooting'];
 
+const REFERENCE_GROUPS = [
+  {
+    title: 'Assessment program inputs',
+    text:
+      'Code analysis, dependency inventory, infrastructure policy, container review, secrets governance, documentation ingestion, branch review, release gates, webhook delivery, API automation, audit events, notification routing, and reporting exports.',
+  },
+  {
+    title: 'Repository signals',
+    text:
+      'package.json, package-lock.json, yarn.lock, pnpm-lock.yaml, requirements.txt, pyproject.toml, setup.py, Pipfile, poetry.lock, Gemfile, Gemfile.lock, *.gemspec, composer.json, Cargo.toml, go.mod, pom.xml, build.gradle, Makefile, CMakeLists.txt, WORKSPACE, Dockerfile, docker-compose.yml, Chart.yaml, kustomization.yaml, Terraform modules, CloudFormation templates, SBOM documents, sbom.spdx.json, API schemas, README.md, docs/**/*.md, mkdocs.yml, conf.py, mint.json, docs.json, ownership metadata, .gitmodules, and .lfsconfig.',
+  },
+  {
+    title: 'Analyzer configuration',
+    text:
+      '.semgrep.yaml, codeql-config.yml, qlpack.yml, sonar-project.properties, .bandit, .brakeman.yml, .eslintrc.js, .rubocop.yml, .checkov.yml, .tfsec.yml, kics.config, Rego bundles, .syft.yaml, trivy.yaml, .grype.yaml, .hadolint.yaml, .safety-policy.yml, .gitleaks.toml, .trufflehog.yaml, and .secrets.baseline.',
+  },
+  {
+    title: 'Build and workflow systems',
+    text:
+      'npm, pnpm, Yarn, pip, Poetry, Pipenv, Bundler, RubyGems, Maven, Gradle, Cargo, Go modules, Composer, Make, CMake, webpack, Bazel, Docker, Kubernetes, Terraform, Helm, Kustomize, GitHub Actions, GitLab CI, Jenkins, CircleCI, Travis CI, Azure Pipelines, Bitbucket Pipelines, AWS CodeBuild, and Google Cloud Build.',
+  },
+];
+
 function sectionId(title: string) {
   return title
     .toLowerCase()
@@ -1083,10 +1106,10 @@ function DocsIndex() {
             ))}
           </nav>
           <a
-            href="/docs-crawl.html"
+            href="#repository-reference"
             className="mt-4 inline-flex text-xs font-semibold text-cyan hover:underline"
           >
-            Reference index
+            Repository signals
           </a>
         </aside>
 
@@ -1118,6 +1141,28 @@ function DocsIndex() {
               </div>
             </section>
           ))}
+
+          <section id="repository-reference" className="scroll-mt-24 border-t border-edge pt-6">
+            <div className="mb-3">
+              <h2 className="text-xl font-black tracking-tight text-ink">
+                Repository assessment reference
+              </h2>
+              <p className="mt-1 text-sm leading-relaxed text-dim">
+                Crawler-readable reference material for repository manifests, analyzer
+                configuration, build systems, CI workflows, policy inputs, and security evidence.
+              </p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {REFERENCE_GROUPS.map((group) => (
+                <section key={group.title} className="rounded-md border border-edge bg-panel p-4">
+                  <h3 className="text-sm font-bold text-ink">{group.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-dim">
+                    <InlineText text={group.text} />
+                  </p>
+                </section>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
     </div>
