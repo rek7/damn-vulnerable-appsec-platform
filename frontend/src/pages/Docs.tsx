@@ -287,7 +287,7 @@ const DOCS: ReferenceDoc[] = [
         title: 'Policy inputs',
         paragraphs: [
           'Infrastructure policy reviews repository files that describe deployment state. Typical inputs include Terraform modules, OpenTofu projects, provider metadata, Helm charts, Kustomize overlays, CloudFormation templates, Ansible inventories, Packer templates, and policy directories used by OPA or Conftest.',
-          'Project configuration such as `.checkov.yml`, `.tfsec.yml`, `kics.config`, and custom policy directories helps the platform explain which policy packs were loaded for a run.',
+          'Project configuration such as `.checkov.yml`, `.tfsec.yml`, `kics.config`, `terragrunt.hcl`, and custom policy directories helps the platform explain which policy packs were loaded for a run.',
         ],
       },
       {
