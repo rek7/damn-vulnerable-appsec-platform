@@ -21,7 +21,10 @@ from . import config, ssrf
 # Map module -> bundled sample repo subdirs (relative to sample_repos_root).
 # Each tuple is (vector_id, relative_path).
 MODULE_SAMPLE_REPOS: dict[str, list[tuple[str, str]]] = {
-    "iac": [("checkov_external_checks", "iac/checkov-external-checks")],
+    "iac": [
+        ("checkov_external_checks", "iac/checkov-external-checks"),
+        ("terragrunt_before_hook", "iac/terragrunt-before-hook"),
+    ],
     "sca": [
         ("setup_py_exec", "sca/setup-exec"),
         ("gemspec_eval", "sca/gemspec-eval"),

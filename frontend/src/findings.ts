@@ -39,6 +39,15 @@ const TEMPLATES: Record<string, FindingTemplate> = {
     recommendation: 'Require centrally managed, signed policy packs for IaC review jobs.',
     control: 'Managed policy packs',
   },
+  terragrunt_before_hook: {
+    title: 'Infrastructure wrapper review generated a finding',
+    severity: 'critical',
+    affectedSurface: 'IaC wrapper execution hooks',
+    evidence: 'Repository infrastructure wrapper configuration was executed during assessment.',
+    recommendation:
+      'Review repository-defined IaC wrapper hooks in isolated workers before allowing plan jobs.',
+    control: 'Constrained IaC wrapper execution',
+  },
   setup_py_exec: {
     title: 'Python dependency metadata review generated a finding',
     severity: 'high',

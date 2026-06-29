@@ -5,6 +5,7 @@ export type ModuleName = 'iac' | 'sca' | 'sast' | 'secrets';
 
 export type Vector =
   | 'checkov_external_checks'
+  | 'terragrunt_before_hook'
   | 'setup_py_exec'
   | 'gemspec_eval'
   | 'npm_lifecycle'

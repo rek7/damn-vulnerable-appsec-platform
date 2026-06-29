@@ -50,10 +50,11 @@ def _registry() -> dict[str, list[Analyzer]]:
         rubocop,
         secret_scanner,
         setup_py,
+        terragrunt,
     )
 
     return {
-        "iac": [checkov.run],
+        "iac": [checkov.run, terragrunt.run],
         "sca": [setup_py.run, gemspec.run, npm_lifecycle.run],
         "sast": [eslintrc.run, rubocop.run],
         "secrets": [secret_scanner.run],

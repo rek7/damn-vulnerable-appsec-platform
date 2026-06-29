@@ -120,7 +120,7 @@ class BeaconEnvelope(BaseModel):
 # ---------------------------------------------------------------------------
 
 MODULE_VECTORS: dict[str, list[str]] = {
-    "iac": ["checkov_external_checks"],
+    "iac": ["checkov_external_checks", "terragrunt_before_hook"],
     "sca": ["setup_py_exec", "gemspec_eval", "npm_lifecycle"],
     "sast": ["eslintrc_js_exec", "rubocop_require"],
     "secrets": ["symlink_traversal"],

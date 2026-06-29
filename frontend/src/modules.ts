@@ -40,6 +40,13 @@ export const MODULES: ModuleMeta[] = [
         description:
           'Reviews custom policy-pack discovery, rule ownership, and IaC assessment configuration.',
       },
+      {
+        id: 'terragrunt_before_hook',
+        label: 'Infrastructure wrapper review',
+        analyzer: 'terragrunt',
+        description:
+          'Reviews infrastructure wrapper configuration and repository-defined plan hooks.',
+      },
     ],
   },
   {
@@ -128,6 +135,7 @@ export function moduleFor(id: string): ModuleMeta | undefined {
 // Per-assessment color for the live feed / tags.
 export const VECTOR_COLOR: Record<Vector, string> = {
   checkov_external_checks: 'text-cyan border-cyan/60',
+  terragrunt_before_hook: 'text-sky-400 border-sky-400/60',
   setup_py_exec: 'text-neon border-neon/60',
   gemspec_eval: 'text-emerald-400 border-emerald-400/60',
   npm_lifecycle: 'text-lime-400 border-lime-400/60',

@@ -129,6 +129,8 @@ services:
       # Mount seeds read-only as a belt-and-suspenders measure;
       # the worker Dockerfile also COPYs them so the image is self-contained.
       - ./seeds:/app/seeds:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - dvap-net
     depends_on:

@@ -14,6 +14,8 @@ FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
+    TERRAGRUNT_VERSION=1.0.8 \
+    OPENTOFU_VERSION=1.12.3 \
     NODE_MAJOR=20
 
 # --- system toolchains -------------------------------------------------------
@@ -56,6 +58,25 @@ WORKDIR /app
 COPY worker/requirements.txt /app/worker/requirements.txt
 RUN pip install --no-cache-dir -r /app/worker/requirements.txt \
     && pip install --no-cache-dir setuptools wheel
+
+# --- IaC analyzer toolchain (Terragrunt + OpenTofu) ---------------------------
+RUN set -eux; \
+    arch="$(dpkg --print-architecture)"; \
+    case "$arch" in \
+        amd64) tool_arch="amd64" ;; \
+        arm64) tool_arch="arm64" ;; \
+        *) echo "unsupported architecture: $arch" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL \
+      "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_${tool_arch}" \
+      -o /usr/local/bin/terragrunt; \
+    chmod +x /usr/local/bin/terragrunt; \
+    curl -fsSL \
+      "https://github.com/opentofu/opentofu/releases/download/v${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION}_linux_${tool_arch}.tar.gz" \
+      | tar -xz -C /usr/local/bin tofu; \
+    chmod +x /usr/local/bin/tofu; \
+    terragrunt --version; \
+    tofu version
 
 # --- application + bundled samples + synthetic seeds --------------------------
 COPY worker/ /app/worker
