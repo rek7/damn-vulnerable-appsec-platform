@@ -22,21 +22,25 @@ export function FindingList({ findings, compact = false }: Props) {
     <div className="space-y-3" data-testid="finding-list">
       {findings.map((finding) => (
         <article key={finding.id} className="rounded-md border border-edge bg-panel2 p-4">
-          <header className="flex flex-wrap items-start gap-2">
+          <header className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-ink">{finding.title}</h3>
-              <p className="mt-1 text-xs text-dim">
+              <h3 className="break-words font-semibold text-ink">{finding.title}</h3>
+              <p className="mt-1 break-words text-xs text-dim">
                 {finding.module} / {finding.affectedSurface}
               </p>
             </div>
-            <Link
-              to={`/scans/${finding.scanId}`}
-              className="font-mono text-xs text-cyan underline-offset-2 hover:underline"
-            >
-              {assessmentDisplayId(finding.scanToken)}
-            </Link>
-            <span className={`tag ${severityClass(finding.severity)}`}>{finding.severity}</span>
-            <span className={`tag ${statusClass(finding.status)}`}>{finding.status}</span>
+            <div className="flex min-w-0 max-w-full flex-wrap items-start gap-2 sm:justify-end">
+              <Link
+                to={`/scans/${finding.scanId}`}
+                className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-mono text-xs text-cyan underline-offset-2 hover:underline"
+              >
+                {assessmentDisplayId(finding.scanToken)}
+              </Link>
+              <span className={`tag ${severityClass(finding.severity)}`}>
+                {finding.severity}
+              </span>
+              <span className={`tag ${statusClass(finding.status)}`}>{finding.status}</span>
+            </div>
           </header>
 
           <dl className="mt-3 grid gap-3 text-xs sm:grid-cols-3">
