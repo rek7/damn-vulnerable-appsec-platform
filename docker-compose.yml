@@ -116,6 +116,7 @@ services:
       context: .
       dockerfile: worker/Dockerfile
     image: dvap-worker:latest
+    hostname: dvap-worker
     # No published port — only api reaches worker:8100 on the internal network
     environment:
       DVAP_SEEDS_FILE: /app/seeds/synthetic.env
