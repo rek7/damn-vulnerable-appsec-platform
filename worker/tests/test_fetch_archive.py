@@ -75,17 +75,23 @@ def test_tar_rejects_parent_traversal(tmp_path: Path) -> None:
         fetch.extract_tar(archive, dest)
 
 
-def test_tar_rejects_symlink_escaping_root(tmp_path: Path) -> None:
+def test_tar_skips_symlink_escaping_root(tmp_path: Path) -> None:
     archive = tmp_path / "link.tar.gz"
     with tarfile.open(archive, "w:gz") as tf:
+        data = b"safe"
+        file_info = tarfile.TarInfo("main.tf")
+        file_info.size = len(data)
+        tf.addfile(file_info, io.BytesIO(data))
+
         info = tarfile.TarInfo("leak")
         info.type = tarfile.SYMTYPE
         info.linkname = "/etc/passwd"  # absolute -> escapes root
         tf.addfile(info)
     dest = tmp_path / "out"
     dest.mkdir()
-    with pytest.raises(fetch.FetchError):
-        fetch.extract_tar(archive, dest)
+    fetch.extract_tar(archive, dest)
+    assert (dest / "main.tf").read_bytes() == b"safe"
+    assert not (dest / "leak").exists()
 
 
 def test_extract_archive_rejects_unknown_type(tmp_path: Path) -> None:

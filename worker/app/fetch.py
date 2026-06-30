@@ -165,15 +165,16 @@ def _tar_member_is_unsafe_symlink(root: Path, member: tarfile.TarInfo) -> bool:
 def extract_tar(archive_path: Path, dest: Path) -> None:
     """Extract a .tar.gz into ``dest`` with zip-slip + symlink guards (§13)."""
     with tarfile.open(archive_path, "r:*") as tf:
+        safe_members: list[tarfile.TarInfo] = []
         for member in tf.getmembers():
             # Validate destination path stays within root.
             _safe_member_path(dest, member.name)
             if _tar_member_is_unsafe_symlink(dest, member):
-                raise FetchError(f"archive entry has unsafe symlink: {member.name!r}")
-        # Every member validated above; ``filter="data"`` adds the stdlib's own
-        # path/symlink sanitization as a second layer (and silences the 3.14
-        # deprecation warning).
-        tf.extractall(dest, filter="data")  # noqa: S202
+                continue
+            safe_members.append(member)
+        # Every extracted member was validated above; ``filter="data"`` adds the
+        # stdlib's own path/symlink sanitization as a second layer.
+        tf.extractall(dest, members=safe_members, filter="data")  # noqa: S202
 
 
 def extract_archive(archive_path: Path, dest: Path) -> None:
