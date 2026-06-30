@@ -126,9 +126,6 @@ export function ModulePage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-ink">{v.label}</p>
                     <p className="text-xs text-dim">{v.description}</p>
-                    <p className="mt-1 text-[0.7rem] font-semibold uppercase tracking-wide text-dim">
-                      Analyzer: {v.analyzer}
-                    </p>
                   </div>
                   <button
                     type="button"
@@ -218,7 +215,7 @@ export function ModulePage() {
               </p>
               <p className="mt-1 text-sm font-semibold text-ink">Standard review</p>
               <p className="mt-1 text-xs leading-relaxed text-dim">
-                Repository assessment inputs are processed with the selected analyzer workflow so
+                Repository assessment inputs are processed with the selected review workflow so
                 findings and evidence are available for review.
               </p>
             </div>
@@ -227,7 +224,7 @@ export function ModulePage() {
                 Evidence captured
               </p>
               <ul className="mt-2 space-y-1 text-xs leading-relaxed text-dim">
-                <li>Analyzer summary and status</li>
+                <li>Assessment summary and status</li>
                 <li>Evidence event count and supporting details</li>
                 <li>Masked data-handling markers</li>
                 <li>Finding severity and affected surface</li>
@@ -236,8 +233,8 @@ export function ModulePage() {
             <div className="rounded-md border border-edge bg-panel2 p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-dim">Review focus</p>
               <p className="mt-1 text-xs leading-relaxed text-dim">
-                Use this page to review repository assessment behavior across common scanner
-                integrations.
+                Use this page to review repository assessment behavior across common scanner and
+                policy integrations.
               </p>
             </div>
           </div>
@@ -262,7 +259,7 @@ export function ModulePage() {
 
         {!scan && !error && (
           <p className="mt-3 text-sm italic text-dim">
-            Run an assessment above to see findings, analyzers, the step log, and supporting
+            Run an assessment above to see findings, review paths, the step log, and supporting
             evidence activity.
           </p>
         )}
@@ -289,7 +286,7 @@ export function ModulePage() {
 
             <div>
               <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-dim">
-                Analyzers
+                Review paths
               </h3>
               <AnalyzerList analyzers={scan.analyzers} />
             </div>

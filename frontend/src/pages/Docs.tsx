@@ -34,7 +34,7 @@ const DOCS: ReferenceDoc[] = [
       {
         title: 'Run the first assessment',
         paragraphs: [
-          'Open the application, select the repository source, choose the branch or uploaded archive, and run the assessment. The result includes analyzer output, normalized findings, evidence links, and audit events.',
+          'Open the application, select the repository source, choose the branch or uploaded archive, and run the assessment. The result includes assessment output, normalized findings, evidence links, and audit events.',
           'Review the first result before changing policy thresholds. That keeps onboarding evidence separate from later triage decisions and release-gate changes.',
         ],
         bullets: [
@@ -223,12 +223,12 @@ const DOCS: ReferenceDoc[] = [
     category: 'Security programs',
     title: 'Code analysis',
     summary:
-      'Review language-aware analyzer output, project-level rule configuration, and developer handoff notes.',
+      'Review language-aware assessment output, project-level rule configuration, and developer handoff notes.',
     sections: [
       {
         title: 'How code analysis works',
         paragraphs: [
-          'Code analysis collects source findings from analyzer output and project-level rule configuration. The platform keeps raw evidence attached to the assessment while presenting a normalized view for triage.',
+          'Code analysis collects source findings from assessment output and project-level rule configuration. The platform keeps raw evidence attached to the assessment while presenting a normalized view for triage.',
           'Configuration files such as `.semgrep.yaml`, `codeql-config.yml`, `qlpack.yml`, `sonar-project.properties`, `.bandit`, `.brakeman.yml`, `.eslintrc.js`, and `.rubocop.yml` help identify custom rules, disabled checks, and project-specific review behavior.',
         ],
       },
@@ -939,7 +939,7 @@ const DOCS: ReferenceDoc[] = [
       {
         title: 'Unexpected findings',
         paragraphs: [
-          'Open the assessment detail page and compare repository inputs, analyzer summary, policy version, and correlated evidence. If the repository changed between runs, compare the commit SHA, branch or tag, analyzer configuration, and assessment inputs.',
+          'Open the assessment detail page and compare repository inputs, assessment summary, policy version, and correlated evidence. If the repository changed between runs, compare the commit SHA, branch or tag, policy configuration, and assessment inputs.',
         ],
       },
       {

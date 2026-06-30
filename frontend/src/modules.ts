@@ -5,8 +5,6 @@ import type { ModuleName, Vector } from './types';
 export interface VectorMeta {
   id: Vector;
   label: string;
-  /** Analyzer family used for this assessment. */
-  analyzer: string;
   /** One-line product description. */
   description: string;
 }
@@ -36,14 +34,12 @@ export const MODULES: ModuleMeta[] = [
       {
         id: 'checkov_external_checks',
         label: 'Policy pack review',
-        analyzer: 'checkov',
         description:
           'Reviews custom policy-pack discovery, rule ownership, and IaC assessment configuration.',
       },
       {
         id: 'terragrunt_before_hook',
         label: 'Infrastructure wrapper review',
-        analyzer: 'terragrunt',
         description:
           'Reviews infrastructure wrapper configuration and repository-defined plan hooks.',
       },
@@ -61,20 +57,17 @@ export const MODULES: ModuleMeta[] = [
       {
         id: 'setup_py_exec',
         label: 'Python package metadata review',
-        analyzer: 'python',
         description:
           'Reviews Python package metadata collection and dependency inventory normalization.',
       },
       {
         id: 'gemspec_eval',
         label: 'Ruby package metadata review',
-        analyzer: 'ruby/gem',
         description: 'Reviews Ruby package metadata collection and gem inventory normalization.',
       },
       {
         id: 'npm_lifecycle',
         label: 'Node dependency workflow review',
-        analyzer: 'node/npm',
         description:
           'Reviews Node dependency workflow settings used during package inventory collection.',
       },
@@ -83,7 +76,7 @@ export const MODULES: ModuleMeta[] = [
   {
     id: 'sast',
     title: 'Security Tools',
-    analog: 'Analyzer configuration and rule-loading workflows',
+    analog: 'Rule configuration and loading workflows',
     blurb:
       'Exercise security tools that consume repository configuration, managed plugins, and language-specific rule packs before analysis begins.',
     accent: 'text-magenta',
@@ -91,16 +84,14 @@ export const MODULES: ModuleMeta[] = [
     vectors: [
       {
         id: 'eslintrc_js_exec',
-        label: 'JavaScript analyzer policy review',
-        analyzer: 'eslint',
+        label: 'JavaScript policy review',
         description:
-          'Reviews JavaScript analyzer configuration, project policy, and rule governance.',
+          'Reviews JavaScript project policy, configuration loading, and rule governance.',
       },
       {
         id: 'rubocop_require',
-        label: 'Ruby analyzer policy review',
-        analyzer: 'rubocop',
-        description: 'Reviews Ruby analyzer configuration, project policy, and rule governance.',
+        label: 'Ruby policy review',
+        description: 'Reviews Ruby project policy, configuration loading, and rule governance.',
       },
     ],
   },
@@ -116,7 +107,6 @@ export const MODULES: ModuleMeta[] = [
       {
         id: 'symlink_traversal',
         label: 'Repository boundary review',
-        analyzer: 'secret-scanner',
         description:
           'Reviews scanner workspace boundaries and how repository file references are normalized.',
       },

@@ -1,4 +1,4 @@
-// Scan detail: analyzers run, result summary, step log, and correlated evidence.
+// Scan detail: review paths, result summary, step log, and correlated evidence.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getScan, listBeacons } from '../api/client';
@@ -126,7 +126,7 @@ export function ScanDetail() {
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="panel p-5">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-dim">
-            Analyzers run
+            Review paths
           </h2>
           <AnalyzerList analyzers={scan.analyzers} />
         </section>
@@ -188,7 +188,7 @@ export function ScanDetail() {
           Investigation handoff
         </h2>
         <p className="text-sm leading-relaxed text-dim">
-          Use the finding evidence, analyzer summary, and activity details above to explain which
+          Use the finding evidence, assessment summary, and activity details above to explain which
           repository input or tool configuration produced the finding. Re-run from the program page
           when you want a fresh assessment record for the same review.
         </p>

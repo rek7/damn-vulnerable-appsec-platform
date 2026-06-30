@@ -70,7 +70,7 @@ export function Findings() {
               Application Security Findings
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-dim">
-              Findings are created from analyzer output, policy status, and correlated assessment
+              Findings are created from assessment output, policy status, and correlated assessment
               telemetry.
             </p>
           </div>

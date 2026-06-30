@@ -64,7 +64,7 @@ export function Home() {
             <p className="mt-3 text-sm leading-relaxed text-dim">
               Run repository assessments across the security programs used by application teams:
               code analysis, dependency review, infrastructure policy, container review, and secrets
-              governance. Findings are reported from analyzer output, policy status, and assessment
+              governance. Findings are reported from assessment output, policy status, and assessment
               evidence.
             </p>
           </div>

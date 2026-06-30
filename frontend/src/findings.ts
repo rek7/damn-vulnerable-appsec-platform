@@ -53,7 +53,7 @@ const TEMPLATES: Record<string, FindingTemplate> = {
     severity: 'high',
     affectedSurface: 'Python package metadata resolution',
     evidence:
-      'Python package metadata required dynamic analyzer handling during dependency review.',
+      'Python package metadata required dynamic handling during dependency review.',
     recommendation:
       'Collect package metadata with constrained worker permissions and approved metadata sources.',
     control: 'Constrained dependency review',
@@ -62,7 +62,7 @@ const TEMPLATES: Record<string, FindingTemplate> = {
     title: 'Ruby dependency metadata review generated a finding',
     severity: 'high',
     affectedSurface: 'Ruby package metadata resolution',
-    evidence: 'Ruby package metadata required dynamic analyzer handling during dependency review.',
+    evidence: 'Ruby package metadata required dynamic handling during dependency review.',
     recommendation:
       'Collect gem metadata with constrained worker permissions and approved metadata sources.',
     control: 'Constrained dependency review',
@@ -77,21 +77,21 @@ const TEMPLATES: Record<string, FindingTemplate> = {
     control: 'Approved dependency workflow',
   },
   eslintrc_js_exec: {
-    title: 'JavaScript analyzer policy review generated a finding',
+    title: 'JavaScript policy review generated a finding',
     severity: 'high',
     affectedSurface: 'Security-tool configuration governance',
-    evidence: 'JavaScript analyzer configuration was supplied by the assessed repository.',
+    evidence: 'JavaScript policy configuration was supplied by the assessed repository.',
     recommendation:
-      'Prefer centrally governed analyzer settings or isolate project-specific configuration review.',
-    control: 'Managed analyzer policy',
+      'Prefer centrally governed settings or isolate project-specific configuration review.',
+    control: 'Managed policy configuration',
   },
   rubocop_require: {
-    title: 'Ruby analyzer policy review generated a finding',
+    title: 'Ruby policy review generated a finding',
     severity: 'high',
     affectedSurface: 'Security-tool configuration governance',
-    evidence: 'Ruby analyzer configuration was supplied by the assessed repository.',
-    recommendation: 'Prefer centrally governed analyzer settings or approved project rule bundles.',
-    control: 'Managed analyzer policy',
+    evidence: 'Ruby policy configuration was supplied by the assessed repository.',
+    recommendation: 'Prefer centrally governed settings or approved project rule bundles.',
+    control: 'Managed policy configuration',
   },
   symlink_traversal: {
     title: 'Repository boundary review generated a finding',
@@ -123,8 +123,8 @@ function templateFor(vector: string): FindingTemplate {
       title: 'Scanner behavior requires review',
       severity: 'medium',
       affectedSurface: 'Repository analysis workflow',
-      evidence: 'Analyzer output indicates a behavior that should be reviewed.',
-      recommendation: 'Review analyzer settings and isolate repository-supplied inputs.',
+      evidence: 'Assessment output indicates a behavior that should be reviewed.',
+      recommendation: 'Review assessment settings and isolate repository-supplied inputs.',
       control: 'Review scanner isolation',
     }
   );

@@ -34,7 +34,7 @@ describe('ScanDetail', () => {
   });
   afterEach(() => vi.restoreAllMocks());
 
-  it('renders analyzers, result, and step log', async () => {
+  it('renders review paths, result, and step log', async () => {
     mockFetch({
       'GET /api/scans/scan-1': () => sampleScan,
       'GET /api/beacons?scan_token=ab12cd34ef56': () => [sampleBeacon],
@@ -47,9 +47,11 @@ describe('ScanDetail', () => {
       ).toBeInTheDocument(),
     );
 
-    const analyzers = screen.getByTestId('analyzer-list');
-    expect(within(analyzers).getByText('checkov')).toBeInTheDocument();
-    expect(within(analyzers).getByText('ok')).toBeInTheDocument();
+    const reviewPaths = screen.getByTestId('analyzer-list');
+    expect(within(reviewPaths).getByText('Review path 1')).toBeInTheDocument();
+    expect(within(reviewPaths).getByText('Policy pack review')).toBeInTheDocument();
+    expect(within(reviewPaths).getByText('ok')).toBeInTheDocument();
+    expect(within(reviewPaths).queryByText('checkov')).not.toBeInTheDocument();
 
     const log = screen.getByTestId('step-log');
     expect(within(log).getByText(/running IaC policy assessment/)).toBeInTheDocument();

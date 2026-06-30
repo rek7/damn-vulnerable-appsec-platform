@@ -51,6 +51,8 @@ describe('ModulePage', () => {
     await screen.findByRole('heading', { name: 'IaC Scanning' });
     expect(screen.getByText(/assessment context/i)).toBeInTheDocument();
     expect(screen.getByText(/assessment profile/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Analyzer:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('terragrunt')).not.toBeInTheDocument();
   });
 
   it('runs a validation scenario: POSTs the right body and renders the inline result', async () => {
